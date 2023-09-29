@@ -33,4 +33,4 @@ Example code:
 ```
 toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters = "X0")
 ```
-![/examples/toppplot_example.pdf]
+![DotPlot of toppData results](/examples/toppplot_example.pdf)
