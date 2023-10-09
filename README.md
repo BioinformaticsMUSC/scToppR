@@ -1,4 +1,4 @@
-# toppHat
+# scToppR
 
 An API wrapper for [ToppGene](https://toppgene.cchmc.org/)
 
@@ -34,3 +34,32 @@ Example code:
 toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters = "X0")
 ```
 ![DotPlot of toppData results](/examples/toppplot_example.png)
+
+If multiple clusters are including in the query, the function will return a list of ggplots.
+
+## Topp Categories
+
+The available Topp Categories are:
+```
+GeneOntologyMolecularFunction
+GeneOntologyBiologicalProcess
+GeneOntologyCellularComponent
+HumanPheno
+MousePheno
+Domain
+Pathway
+Pubmed
+Interaction
+Cytoband
+TFBS
+GeneFamily
+Coexpression
+CoexpressionAtlas
+ToppCell
+Computational
+MicroRNA
+Drug
+Disease
+```
+
+To capture these in R, run the command `get_ToppCats()`. 
