@@ -8,6 +8,7 @@
 #' @param max_genes Maximum number of genes to match in a query
 #' @param max_results Maximum number of results per cluster
 #' @param correction P-value correction method ("FDR" is "BH")
+#' @importFrom stringr str_glue str_c
 #' @return data.frame
 #' @examples
 #' toppFun(markers=c("IFNG", "FOXP3"), topp_categories="GeneOntologyBiologicalProcess", key_type="SYMBOL")
@@ -47,7 +48,7 @@ toppFun <- function(markers,
   }
   #report any missing clusters
   if (length(missing_clusters) > 0) {
-    write(stringr::str_glue("WARNING: no results found for clusters {str_c(missing_clusters, collapse=',')}"),
+    write(stringr::str_glue("WARNING: no results found for clusters {stringr::str_c(missing_clusters, collapse=',')}"),
           stderr())
   }
   return (big_df)
@@ -161,7 +162,7 @@ get_ToppCats <- function() {
                 "GeneFamily",
                 "Coexpression",
                 "CoexpressionAtlas",
-                "ToppGene",
+                "ToppCell",
                 "Computational",
                 "MicroRNA",
                 "Drug",
