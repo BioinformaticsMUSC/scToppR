@@ -1,4 +1,4 @@
-Package: toppHat
+Package: scToppR
 Title: API Wrapper for ToppGene
 Version: 0.0.0.9000
 Authors@R: 
