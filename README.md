@@ -4,6 +4,16 @@ An API wrapper for [ToppGene](https://toppgene.cchmc.org/)
 
 Currently, this package utilizes the ToppFun portion of the site. Lists of marker genes can be submitted to create a dataframe of results.
 
+
+## Installation
+
+This package can be installed from the Github repository:
+```
+if(!requireNamespace("devtools", quietly = TRUE))
+    install.packages("devtools")
+devtools::install_github('BioinformaticsMUSC/scToppR')
+```
+
 ## Usage
 
 To query ToppGene and create a dataframe of results, use the function `toppFun`. The function takes as inputs a table of top markers (with clusters/cell types as columns) and a list of any ToppGene categories (e.g. "GeneOntologyMolecularFunction" and/or "ToppGene")
