@@ -49,7 +49,7 @@ toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters = "X0")
 ```
 ![DotPlot of toppData results](/examples/toppplot_example.png)
 
-If multiple clusters are including in the query, the function will return a list of ggplots.
+If multiple clusters are including in the query, the function will return a list of ggplots, which can be shown using [Patchwork](https://patchwork.data-imaginist.com/) or another similar package.
 
 ## Topp Categories
 
