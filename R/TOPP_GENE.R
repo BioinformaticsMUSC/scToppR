@@ -21,13 +21,24 @@ toppFun <- function(markers,
                     max_genes=1500,
                     max_results=10,
                     correction="FDR") {
+  #parse input
+  if (class(markers) %in% c("list", "character")) {
+    markers = list(markers=markers)
+  } else if (class(markers) != 'data.frame') {
+    stop("Cannot parse list/table of markers.")
+  }
+
   big_df <- data.frame()
   missing_clusters = c()
-  for (col in colnames(markers)) {
 
+  for (col in names(markers)) {
 
     if (!(col %in% c('rank', 'X'))) {
-      cat('Working on cluster:', col, "\n")
+      if (length(names(markers)) > 1) {
+        cat('Working on cluster:', col, "\n")
+      } else {
+        cat('Working on list of markers\n')
+      }
       gene_list = markers[[col]]
       d <- get_topp(gene_list = gene_list,
                     topp_categories = topp_categories,
@@ -39,6 +50,8 @@ toppFun <- function(markers,
                     correction=correction)
       if (nrow(d) == 0){
         missing_clusters = append(missing_clusters, col)
+      } else if (length(names(markers)) == 1) {
+        big_df <- rbind(big_df, d)
       } else {
         d[['Cluster']] = col
         big_df <- rbind(big_df, d)

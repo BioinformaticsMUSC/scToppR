@@ -16,7 +16,11 @@ devtools::install_github('BioinformaticsMUSC/scToppR')
 
 ## Usage
 
-To query ToppGene and create a dataframe of results, use the function `toppFun`. The function takes as inputs a table of top markers (with clusters/cell types as columns) and a list of any ToppGene categories (e.g. "GeneOntologyMolecularFunction" and/or "ToppGene")
+To query ToppGene and create a dataframe of results, use the function `toppFun`. The function takes as inputs a list or table of top markers (with clusters/cell types as columns) and a list of any ToppGene categories (e.g. "GeneOntologyMolecularFunction" and/or "ToppGene")
+
+Input types: you can submit a single list or character vector of gene symbols, e.g. `c("IFNG", "FOXP3"...)` or a data.frame with column names as cluster/celltype labels. A table can also be provided. scToppR can also handle the "top_markers" data.frames from the package [Presto](https://github.com/immunogenomics/presto) as inputs.
+
+If a table is provided, a data.frame of results for all clusters will be returned.
 
 ```
 toppData <- toppFun(top_markers, topp_categories = c("GeneOntologyMolecularFunction",
