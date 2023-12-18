@@ -4,7 +4,15 @@
 \alias{toppPlot}
 \title{Create a dotplot from toppdata results}
 \usage{
-toppPlot(toppData, category = NULL, clusters = NULL, p_val_adj = "BH")
+toppPlot(
+  toppData,
+  category = NULL,
+  clusters = NULL,
+  p_val_adj = "BH",
+  save = FALSE,
+  save_dir = NULL,
+  width = 7
+)
 }
 \arguments{
 \item{toppData}{A toppData results dataframe}

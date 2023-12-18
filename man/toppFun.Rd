@@ -7,18 +7,32 @@
 toppFun(
   markers,
   topp_categories,
+  cluster_col = "cluster",
+  gene_col = "gene",
+  num_genes = 20,
+  do_log = TRUE,
+  FDR_cutoff = 5,
+  clusters = NULL,
+  correction = "FDR",
   key_type = "SYMBOL",
   p_value = 0.05,
   min_genes = 1,
   max_genes = 1500,
-  max_results = 10,
-  correction = "FDR"
+  max_results = 50
 )
 }
 \arguments{
 \item{markers}{A vector of markers or dataframe with columns as cluster labels}
 
 \item{topp_categories}{A string or vector with specific toppfun categories for the query}
+
+\item{cluster_col}{Column name for the groups of cells (e.g. cluster or celltype)}
+
+\item{gene_col}{Column name for genes (e.g. gene or feature)}
+
+\item{num_genes}{Number of genes per group to use for toppGene query (default = 20)}
+
+\item{correction}{P-value correction method ("FDR" is "BH")}
 
 \item{key_type}{Gene name format}
 
@@ -29,8 +43,6 @@ toppFun(
 \item{max_genes}{Maximum number of genes to match in a query}
 
 \item{max_results}{Maximum number of results per cluster}
-
-\item{correction}{P-value correction method ("FDR" is "BH")}
 }
 \value{
 data.frame
@@ -39,5 +51,5 @@ data.frame
 Get results from ToppFun
 }
 \examples{
-toppFun(markers=c("IFNG", "FOXP3"), topp_categories="GeneOntologyBiologicalProcess", key_type="SYMBOL")
+toppFun(markers=marker_table, topp_categories="GeneOntologyBiologicalProcess", key_type="SYMBOL")
 }
