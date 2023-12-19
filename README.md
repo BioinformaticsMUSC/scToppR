@@ -30,6 +30,7 @@ toppData <- toppFun(top_markers, topp_categories = c("GeneOntologyMolecularFunct
 
 This results in a dataframe like the following (only showing the top 5 rows): 
 | Category | ID | Name | PValue | QValueFDRBH | QValueFDRBY | QValueBonferroni | TotalGenes | GenesInTerm | GenesInQuery | GenesInTermInQuery | Source | URL | Cluster | nlog10_fdr |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | GeneOntologyMolecularFunction | GO:0033885 | 10-hydroxy-9-(phosphonooxy)octadecanoate phosphatase activity | 0.000804141754370397 | 0.0128662680699264 | 0.0699043269565933 | 0.102930144559411 | 19912 | 1 | 16 | 1 |   |   | 0 | 1.8905474042743 |
 | 2 | GeneOntologyMolecularFunction | GO:0038121 | C-C motif chemokine 21 receptor activity | 0.000804141754370397 | 0.0128662680699264 | 0.0699043269565933 | 0.102930144559411 | 19912 | 1 | 16 | 1 |   |   | 0 | 1.8905474042743 |
 | 3 | GeneOntologyMolecularFunction | GO:0038117 | C-C motif chemokine 19 receptor activity | 0.000804141754370397 | 0.0128662680699264 | 0.0699043269565933 | 0.102930144559411 | 19912 | 1 | 16 | 1 |   |   | 0 | 1.8905474042743 |
