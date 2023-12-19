@@ -124,7 +124,7 @@ toppPlot <- function (toppData,
   } else {
       for (cat in category) {
         for (c in clusters) {
-          toppData |>
+          dotplot <- toppData |>
             dplyr::filter(Cluster == c) |>
             dplyr::filter(Category == category) |>
             dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
@@ -153,6 +153,7 @@ toppPlot <- function (toppData,
           }
         }
       }
+    return (dotplot)
   }
 }
 
