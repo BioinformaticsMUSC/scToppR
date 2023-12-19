@@ -1,0 +1,59 @@
+---
+title: "Introduction to scToppR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This package functions as an API wrapper to [ToppGene](https://toppgene.cchmc.org/). It takes a file from Seurat's FindAllMarkers, Presto's Wilcoxauc functions, or similarly formatted data that contains columns of genes, groups of cells (clusters or celltypes), avg log fold changes, and p-values. 
+
+As an introduction, this vignette will work with the FindAllMarkers output from Seurat's PBMC 3k clustering tutorial: [https://satijalab.org/seurat/articles/pbmc3k_tutorial.html](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html)
+
+You can follow that tutorial and get the markers file from this line:
+
+```
+pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE)
+```
+Alternatively, this markers table is included in the scToppR package:
+```{r setup}
+#library(scToppR)
+devtools::load_all()
+data("pbmc.markers")
+head(pbmc.markers)
+```
+
+
+With this data we can run the function `toppFun` to get results from ToppGene.
+
+```{r toppFun_1}
+toppData <- toppFun(markers = pbmc.markers,
+                    topp_categories = NULL, 
+                    cluster_col = "cluster", 
+                    gene_col = "gene")
+
+```
+
+Here it is important to tell toppFun the names of the relevant columns for clusters and genes. Additionally, you can run toppFun on all ToppGene categories by setting topp_categories to NULL. You may also provide 1 or more specific categories as a list. To see all ToppGene categories, you can also use the function get_ToppCats():
+
+```{r topp_cats}
+get_ToppCats()
+```
+
+You can also set additional parameters in the toppFun function, please check the documentation for more information.
+
+The results of toppFun are organized into a data frame as such:
+
+```{r toppData_out}
+head(toppData)
+
+```
+
