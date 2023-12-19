@@ -6,7 +6,7 @@
 \usage{
 toppFun(
   markers,
-  topp_categories,
+  topp_categories = NULL,
   cluster_col = "cluster",
   gene_col = "gene",
   num_genes = 20,

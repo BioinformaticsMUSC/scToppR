@@ -8,6 +8,7 @@ toppPlot(
   toppData,
   category = NULL,
   clusters = NULL,
+  num_terms = 10,
   p_val_adj = "BH",
   save = FALSE,
   save_dir = NULL,
@@ -20,6 +21,8 @@ toppPlot(
 \item{category}{The topp category to plot}
 
 \item{clusters}{The cluster(s) to plot}
+
+\item{num_terms}{The number of terms from the toppData results to be plotted, per cluster}
 
 \item{p_val_adj}{The P-value correction method: "BH", "Bonferroni", "BY", or "none"}
 }

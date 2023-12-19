@@ -12,20 +12,25 @@ This package can be installed from the Github repository:
 if(!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
 devtools::install_github('BioinformaticsMUSC/scToppR')
+library(scToppR)
 ```
 
 ## Usage
 
 To query ToppGene and create a dataframe of results, use the function `toppFun`. The function takes as inputs a list or table of top markers (with clusters/cell types as columns) and a list of any ToppGene categories (e.g. "GeneOntologyMolecularFunction" and/or "ToppGene")
 
-Input types: you can submit a single list or character vector of gene symbols, e.g. `c("IFNG", "FOXP3"...)` or a data.frame with column names as cluster/celltype labels. A table can also be provided. scToppR can also handle the "top_markers" data.frames from the package [Presto](https://github.com/immunogenomics/presto) as inputs.
+Input data: the input for `toppData` is a dataframe similar to FindAllMarkers (Seurat) or Wilcoxauc (Presto) outputs. The dataframe needs a columns to determine genes, groups of cells (e.g., clusters or celltypes), average log fold changes, and p-values. 
 
-If a table is provided, a data.frame of results for all clusters will be returned.
+The package includes example data in the FindAllMarkers format, using the PBMC 3K dataset from the Seurat guided clustering tutorial.
 
 ```         
-toppData <- toppFun(top_markers, topp_categories = c("GeneOntologyMolecularFunction",
-                                              "GeneOntologyBiologicalProcess"),
-             max_results = 5)
+data(pbmc.markers)
+toppData <- toppFun(pbmc.markers, 
+                    topp_categories = NULL,
+                    cluster_col = "cluster",
+                    gene_col = "gene"
+
+            )
 ```
 
 This results in a dataframe like the following (only showing the top 5 rows): 
@@ -40,18 +45,31 @@ This results in a dataframe like the following (only showing the top 5 rows):
 
 ## Visualization
 
-Once a toppData dataframe is created, it can be used to create a dotplot.
+Once a toppData dataframe is created, it can be used to create a dotplot or balloon plot. Plots can be automatically saved, and you can enter any number of clusters and categories to produce several and save several plots at once.
 
-Example code:
+Example code for dotplot
 
 ```         
-toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters = "X0")
+toppPlot(toppData, category = "ToppCell", clusters = "1", save = T, num_terms = 10)
 ```
 
 ![DotPlot of toppData results](/examples/toppplot_example.png)
 
 If multiple clusters are including in the query, the function will return a list of ggplots, which can be shown using [Patchwork](https://patchwork.data-imaginist.com/) or another similar package.
 
+Balloon plots can help visualize any overlap (or lack thereof) between the top terms for each group of cells.
+
+Example code for balloon plot
+
+```
+toppBalloon(toppData,
+            categories = c("GeneOntologyMolecularFunction"),
+            balloons = 2,
+            height = 6, 
+            width=15)
+```
+
+![Balloon plot of toppData results](/examples/balloon_example.png)
 ## Topp Categories
 
 The available Topp Categories are:
