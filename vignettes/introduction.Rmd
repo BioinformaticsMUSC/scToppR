@@ -57,3 +57,31 @@ head(toppData)
 
 ```
 
+## Plotting
+
+scToppR can automatically create DotPlots for each ToppGene category. Simply run:
+
+```{r toppPlot_1}
+plots <- toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters = NULL)
+plots[1]
+```
+
+This will create a list of plots for all categories and clusters requested. Here, the category "GenoOntologyMolecularFunction" was requested, and the `clusters` parameter was left NULL as default. If either `category` or `clusters` are NULL, then all available options are used. For example, the output here creates a list of plots for each cluster for the "GenoOntologyMolecularFunction". If multiple categories and all clusters are used, it will create a list of lists. This can get unwieldly, so the function can automatically save each plot as well, using the `save = TRUE` parameter. This will automatically save each file in the format: `{category}_{cluster}_dotplot.pdf`
+
+scToppR can also create balloon plots showing overlapping terms between all clusters.
+
+```{r toppBalloon}
+toppBalloon(toppData, categories = "GeneOntologyMolecularFunction")
+```
+
+This function also has a save parameter, which will automatically save plots, which is helpful if multiple categories are visualized.
+
+
+## Saving 
+
+scToppR will also automatically save the results of the ToppGene query. By default it will save separate files for each cluster. To save as one large file, set the parameter `split = FALSE`. It will also save all files as Excel spreadsheets, but this can be changed using the `format` parameter--it must be one of `c("xlsx", "csv", "tsv")`.
+
+```{r}
+toppSave(toppData, filename = "PBMC", split = TRUE, format = "xslx")
+```
+

@@ -13,7 +13,7 @@
 #' @importFrom viridis scale_color_viridis
 #' @export
 toppPlot <- function (toppData,
-                      category = NULL,
+                      categories = NULL,
                       clusters = NULL,
                       num_terms = 10,
                       p_val_adj="BH",
@@ -28,16 +28,17 @@ toppPlot <- function (toppData,
     }
   }
   #parse category
-  if (!(is.null(category))){
-    if (length(c(category)) > 1) {
-      stop("Please select one ToppFun category to plot (e.g. category = 'GeneOntologyMolecularFunction').")
-    }
-    else if (length(c(category)) == 1) {
-      category = category[1]
-    }
-    else {
-      stop("Invalid input data - please check your toppData dataframe")
-    }
+  if (is.null(categories)){
+    categories = unique(toppData$Category)
+    # if (length(c(category)) > 1) {
+    #   stop("Please select one ToppFun category to plot (e.g. category = 'GeneOntologyMolecularFunction').")
+    # }
+    # else if (length(c(category)) == 1) {
+    #   category = category[1]
+    # }
+    # else {
+    #   stop("Invalid input data - please check your toppData dataframe")
+    # }
   }
 
   #parse pvalue
@@ -88,12 +89,13 @@ toppPlot <- function (toppData,
   if (length(clusters) > 1) {
     cat("Multiple clusters entered: function returns a list of ggplots")
 
-    plot_list = list()
-    for (cat in category) {
+    overall_plot_list = list()
+    for (cat in categories) {
+      category_plot_list = list()
       for (c in clusters) {
-        plot_list[[c]] <- toppData |>
+        category_plot_list[[c]] <- toppData |>
           dplyr::filter(Cluster == c) |>
-          dplyr::filter(Category == category) |>
+          dplyr::filter(Category == cat) |>
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
           dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
           dplyr::arrange(-geneRatio) |>
@@ -105,7 +107,7 @@ toppPlot <- function (toppData,
           )) +
           ggplot2::geom_segment(aes(xend=0, yend=Name)) +
           ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_col))) +
-          viridis::scale_color_viridis()  +
+          viridis::scale_color_viridis(option = "C")  +
           ggplot2::theme_bw() +
           ggplot2::ylab(cat) +
           ggplot2::ggtitle(stringr::str_glue("Cluster {c}")) +
@@ -119,10 +121,11 @@ toppPlot <- function (toppData,
                           width = width)
         }
       }
+      overall_plot_list[[cat]] <- category_plot_list
     }
-    return (plot_list)
+    return (overall_plot_list)
   } else {
-      for (cat in category) {
+      for (cat in categories) {
         for (c in clusters) {
           dotplot <- toppData |>
             dplyr::filter(Cluster == c) |>
@@ -138,7 +141,7 @@ toppPlot <- function (toppData,
             )) +
             ggplot2::geom_segment(aes(xend=0, yend=Name)) +
             ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_col))) +
-            viridis::scale_color_viridis()  +
+            viridis::scale_color_viridis(option = "C")  +
             ggplot2::theme_bw() +
             ggplot2::ylab(cat) +
             ggplot2::ggtitle(stringr::str_glue("Cluster {c}")) +
@@ -177,7 +180,7 @@ toppBalloon <- function (toppData,
                          categories = NULL,
                          balloons = 3,
                          filename = NULL,
-                         save = TRUE,
+                         save = FALSE,
                          height = 5,
                          width = 10) {
 
@@ -187,39 +190,39 @@ toppBalloon <- function (toppData,
   balloon <- list()
   for (cat in categories) {
     cat("Balloon Plot:", cat)
-  balloon[[cat]] <- toppData |>
-    dplyr::filter(Category == cat) |>
-    dplyr::group_by(Cluster) |>
-    dplyr::slice_max(order_by=-nlog10_fdr, n=balloons, with_ties = F) |>
-    dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-    ggplot(aes(
-      x=forcats::fct_reorder(Name, Cluster),
-      y=Cluster,
-    )) +
-    ggplot2::geom_point(aes(size=geneRatio, color=nlog10_fdr)) +
-    viridis::scale_color_viridis(option = "C") +
-    ggplot2::labs(color="FDR", size="Genes") +
-    ggplot2::xlab(cat) +
-    ggplot2::theme_bw() +
-    ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = F)) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(size = 6, angle = 60, hjust=1.1, vjust=1.05),
-                   panel.border = ggplot2::element_rect(color = NA))
+    balloon[[cat]] <- toppData |>
+      dplyr::filter(Category == cat) |>
+      dplyr::group_by(Cluster) |>
+      dplyr::slice_max(order_by=-nlog10_fdr, n=balloons, with_ties = F) |>
+      dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
+      ggplot(aes(
+        x=forcats::fct_reorder(Name, Cluster),
+        y=Cluster,
+      )) +
+      ggplot2::geom_point(aes(size=geneRatio, color=nlog10_fdr)) +
+      viridis::scale_color_viridis(option = "C") +
+      ggplot2::labs(color="FDR", size="Genes") +
+      ggplot2::xlab(cat) +
+      ggplot2::theme_bw() +
+      ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = F)) +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(size = 6, angle = 60, hjust=1.1, vjust=1.05),
+                     panel.border = ggplot2::element_rect(color = NA))
 
-    if (is.null(filename)) {
-      plot_filename <- stringr::str_glue("toppBalloon_{cat}.pdf")
-    } else {
-      plot_filename = stringr::str_glue("{filename}_{cat}.pdf")
-    }
-    if (isTRUE(save)){
-      ggplot2::ggsave(plot_filename, height = height, width = width)
-      cat(" saved to:", plot_filename)
-    }
-  cat("\n")
+      if (is.null(filename)) {
+        plot_filename <- stringr::str_glue("toppBalloon_{cat}.pdf")
+      } else {
+        plot_filename = stringr::str_glue("{filename}_{cat}.pdf")
+      }
+      if (isTRUE(save)){
+        ggplot2::ggsave(plot_filename, height = height, width = width)
+        cat(" saved to:", plot_filename)
+      }
+    cat("\n")
 
   }
-  if (length(balloon) == 1) {
-    print(balloon[1])
-  }
+  # if (length(balloon) == 1) {
+  #   print(balloon[1])
+  # }
   return (balloon)
 }
 
