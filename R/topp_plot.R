@@ -1,7 +1,7 @@
 #' Create a dotplot from toppdata results
 #'
 #' @param toppData A toppData results dataframe
-#' @param category The topp category to plot
+#' @param categories The topp categories to plot
 #' @param clusters The cluster(s) to plot
 #' @param p_val_adj The P-value correction method: "BH", "Bonferroni", "BY", or "none"
 #' @param num_terms The number of terms from the toppData results to be plotted, per cluster
