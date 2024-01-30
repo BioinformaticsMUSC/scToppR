@@ -129,7 +129,7 @@ toppPlot <- function (toppData,
         for (c in clusters) {
           dotplot <- toppData |>
             dplyr::filter(Cluster == c) |>
-            dplyr::filter(Category == category) |>
+            dplyr::filter(Category == cat) |>
             dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
             dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
             dplyr::arrange(-geneRatio) |>
