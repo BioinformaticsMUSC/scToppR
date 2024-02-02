@@ -184,9 +184,11 @@ process_markers <- function (markers, cluster_col, gene_col,
         dplyr::select(!!as.name(gene_col))
     }
     if (!(is.null(num_genes))) {
-      all_cl_markers <- all_cl_markers[1:num_genes]
+      marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col]
+    } else {
+      marker_list[[cl]] <- all_cl_markers[[gene_col]]
     }
-    marker_list[[cl]] <- all_cl_markers[[gene_col]]
+
   }
   return (marker_list)
 
