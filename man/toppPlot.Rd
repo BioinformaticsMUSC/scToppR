@@ -6,25 +6,37 @@
 \usage{
 toppPlot(
   toppData,
-  category = NULL,
+  categories = NULL,
   clusters = NULL,
   num_terms = 10,
   p_val_adj = "BH",
   save = FALSE,
   save_dir = NULL,
-  width = 7
+  width = 5,
+  height = 6,
+  y_axis_text_size = 8
 )
 }
 \arguments{
 \item{toppData}{A toppData results dataframe}
 
-\item{category}{The topp category to plot}
+\item{categories}{The topp categories to plot}
 
 \item{clusters}{The cluster(s) to plot}
 
 \item{num_terms}{The number of terms from the toppData results to be plotted, per cluster}
 
 \item{p_val_adj}{The P-value correction method: "BH", "Bonferroni", "BY", or "none"}
+
+\item{save}{Whether to save the file automatically}
+
+\item{save_dir}{Directory to save file}
+
+\item{width}{width of the saved file (inches)}
+
+\item{height}{height of the saved file (inches)}
+
+\item{y_axis_text_size}{Size of the Y axis text - for certain categories, it's helpful to decrease this}
 }
 \value{
 ggplot

@@ -10,7 +10,7 @@ get_Entrez(genes)
 \item{genes}{A list of genes}
 }
 \value{
-a vector of genes in Entrex format
+a vector of genes in Entrez format
 }
 \description{
 Convert genes into Entrez format

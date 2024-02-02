@@ -10,12 +10,12 @@ toppFun(
   cluster_col = "cluster",
   gene_col = "gene",
   num_genes = 20,
-  do_log = TRUE,
-  FDR_cutoff = 5,
+  pval_cutoff = 0.5,
+  fc_cutoff = 0,
+  fc_filter = "ALL",
   clusters = NULL,
   correction = "FDR",
   key_type = "SYMBOL",
-  p_value = 0.05,
   min_genes = 1,
   max_genes = 1500,
   max_results = 50
@@ -32,11 +32,17 @@ toppFun(
 
 \item{num_genes}{Number of genes per group to use for toppGene query (default = 20)}
 
+\item{pval_cutoff}{(adjusted) P-value cutoff for filtering differentially expressed genes}
+
+\item{fc_cutoff}{Avg log fold change cutoff for filtering differentially expressed genes}
+
+\item{fc_filter}{Include "ALL" genes, or only "UPREG" or "DOWNREG" for each cluster}
+
+\item{clusters}{Which clusters to include in toppGene query}
+
 \item{correction}{P-value correction method ("FDR" is "BH")}
 
 \item{key_type}{Gene name format}
-
-\item{p_value}{P-value cutoff for results}
 
 \item{min_genes}{Minimum number of genes to match in a query}
 

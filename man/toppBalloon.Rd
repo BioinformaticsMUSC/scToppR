@@ -9,7 +9,7 @@ toppBalloon(
   categories = NULL,
   balloons = 3,
   filename = NULL,
-  save = TRUE,
+  save = FALSE,
   height = 5,
   width = 10
 )
