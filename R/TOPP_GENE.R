@@ -28,6 +28,7 @@ toppFun <- function(markers,
                     pval_cutoff = 0.5,
                     fc_cutoff = 0,
                     fc_filter = "ALL",
+                    genes_submit_cutoff = 1000,
                     clusters = NULL,
                     correction="FDR",
                     key_type = "SYMBOL",
@@ -55,6 +56,7 @@ toppFun <- function(markers,
                                     num_genes=num_genes,
                                     pval_cutoff=pval_cutoff,
                                    fc_cutoff = fc_cutoff,
+                                   genes_submit_cutoff=genes_submit_cutoff,
                                     fc_filter=fc_filter,
                                     avg_logFC_col="avg_logFC",
                                     p_val_col="p_val",
@@ -139,11 +141,13 @@ get_Entrez<- function(genes){
   return (new_gene_list)
 }
 
+##### PROCESS MARKER INPUTS
 process_markers <- function (markers, cluster_col, gene_col,
-                             num_genes=NULL,
+                             num_genes=1000,
                              pval_cutoff=0.5,
                              fc_cutoff=0,
                              fc_filter="ALL",
+                             genes_submit_cutoff=1000,
                              avg_logFC_col="avg_logFC",
                              p_val_col="p_val",
                              adj_p_val_col="p_val_adj") {
@@ -184,16 +188,20 @@ process_markers <- function (markers, cluster_col, gene_col,
         dplyr::select(!!as.name(gene_col))
     }
     if (!(is.null(num_genes))) {
-      marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col]
+      if (length(all_cl_markers[[gene_col]]) > num_genes) {
+        marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
+      }
     } else {
-      marker_list[[cl]] <- all_cl_markers[[gene_col]]
+      marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
     }
-
+    #print(marker_list[[cl]])
+    # if (length(marker_list) > genes_submit_cutoff) {
+    #   marker_list <- marker_list[1:genes_submit_cutoff]
+    # }
   }
+  #print(marker_list)
   return (marker_list)
-
 }
-
 
 get_topp <- function(gene_list,
                       key_type,
@@ -205,7 +213,7 @@ get_topp <- function(gene_list,
                       correction="FDR") {
 
   #assertions - to add
-
+  #print(gene_list)
   #convert gene names if necessary
   if (key_type != 'ENTREZ') {
     new_gene_list = get_Entrez(gene_list)
@@ -397,4 +405,3 @@ toppSave <- function (toppData,
   }
 
 }
-
