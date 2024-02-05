@@ -22,6 +22,7 @@ toppPlot <- function (toppData,
                       clusters = NULL,
                       num_terms = 10,
                       p_val_adj="BH",
+                      p_val_display="log",
                       save = FALSE,
                       save_dir = NULL,
                       width = 5,
@@ -42,43 +43,55 @@ toppPlot <- function (toppData,
   #parse category
   if (is.null(categories)){
     categories = unique(toppData$Category)
-    # if (length(c(category)) > 1) {
-    #   stop("Please select one ToppFun category to plot (e.g. category = 'GeneOntologyMolecularFunction').")
-    # }
-    # else if (length(c(category)) == 1) {
-    #   category = category[1]
-    # }
-    # else {
-    #   stop("Invalid input data - please check your toppData dataframe")
-    # }
+  }
+
+  #parse clusters
+  if (is.null(clusters)) {
+    if ("Cluster" %in% colnames(toppData)) {
+      clusters = unique(toppData$Cluster)
+    }
   }
 
   #parse pvalue
+
+  tmp_data <- toppData
 
   if (!(p_val_adj %in% c("BH", "Bonferroni", "BY", "none", "None", "log"))) {
     cat("P value adjustment not found - using 'BH' by default. For no adjustment, use p_val_adj = 'none'.")
   }
 
-  if ("nlog10_fdr" %in% colnames(toppData)) {
-    p_val_adj = "log"
-  }
-
+  
   p_val_col = switch(p_val_adj,
                      "BH" = "QValueFDRBH",
                      "Bonferroni" = "QValueBonferroni",
                      "BY" = "QvalueFDRBY",
                      "none" = "PValue",
                      "None" = "PValue",
-                     "log" = "nlog10_fdr",
                      "QValueFDRBH")
 
-  if (p_val_col %in% c("QValueFDRBH", "QValueBonferroni", "QvalueFDRBY")) {
-    color_label = "Adj. P-value"
-  } else if (p_val_col == "nlog10_fdr") {
+
+  if (p_val_display == 'log') {
     color_label = "-Log10(FDR)"
+    tmp_data <- tmp_data |>
+      dplyr::mutate(nlog10_fdr = -log10(!!as.name(p_val_col)))
+    p_val_display_column = "nlog10_fdr"
+  } else if (p_val_col %in% c("QValueFDRBH", "QValueBonferroni", "QvalueFDRBY")) {
+    color_label = "Adj. P-value"
+    p_val_display_column = p_val_col
   } else {
     color_label = "P-value"
+    p_val_display_column = p_val_col
   }
+
+  #
+  
+  # if (p_val_display == "log") {
+  #   #create nlog10_fdr column
+  #   tmp_data <- tmp_data |>
+  #     dplyr::mutate(nlog10_fdr = -log10(!!as.name(p_val_col)))
+  #   p_val_display_column = "nlog10_fdr"
+  # }
+
 
   #parse save
   if (isTRUE(save)) {
@@ -89,15 +102,9 @@ toppPlot <- function (toppData,
     }
   }
 
-  #parse clusters
-  if (is.null(clusters)) {
-    if ("Cluster" %in% colnames(toppData)) {
-      clusters = unique(toppData$Cluster)
-    }
-  }
-
-  #clusters <- clusters |> as.character()
-
+  ###
+  ###MAIN PLOTTING SECTION
+  ###
   if (length(clusters) > 1) {
     cat("Multiple clusters entered: function returns a list of ggplots")
 
@@ -105,7 +112,7 @@ toppPlot <- function (toppData,
     for (cat in categories) {
       category_plot_list = list()
       for (c in clusters) {
-        category_plot_list[[c]] <- toppData |>
+        category_plot_list[[c]] <- tmp_data |>
           dplyr::filter(Cluster == c) |>
           dplyr::filter(Category == cat) |>
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
@@ -118,7 +125,7 @@ toppPlot <- function (toppData,
             y = Name
           )) +
           ggplot2::geom_segment(aes(xend=0, yend=Name)) +
-          ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_col))) +
+          ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
           viridis::scale_color_viridis(option = "C")  +
           ggplot2::theme_bw() +
           ggplot2::ylab(cat) +
@@ -140,7 +147,7 @@ toppPlot <- function (toppData,
     category_plot_list = list()
     c = clusters[1]
       for (cat in categories) {
-        category_plot_list[[cat]] <- toppData |>
+        category_plot_list[[cat]] <- tmp_data |>
           dplyr::filter(Cluster == c) |>
           dplyr::filter(Category == cat) |>
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
@@ -153,11 +160,11 @@ toppPlot <- function (toppData,
             y = Name
           )) +
           ggplot2::geom_segment(aes(xend=0, yend=Name)) +
-          ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_col))) +
+          ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
           viridis::scale_color_viridis(option = "C")  +
           ggplot2::theme_bw() +
           ggplot2::ylab(cat) +
-          ggplot2::ggtitle(stringr::str_glue("Cluster {c}")) +
+          ggplot2::ggtitle(stringr::str_glue("Cluster: {c}")) +
           ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
           ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = F)) +
           ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
@@ -195,6 +202,7 @@ toppPlot <- function (toppData,
 toppBalloon <- function (toppData,
                          categories = NULL,
                          balloons = 3,
+                         x_axis_text_size = 6,
                          filename = NULL,
                          save = FALSE,
                          height = 5,
@@ -203,14 +211,14 @@ toppBalloon <- function (toppData,
   if (is.null(categories)) {
     categories <- unique(toppData[["Category"]])
   }
-  balloon <- list()
+  balloon_list <- list()
   for (cat in categories) {
     cat("Balloon Plot:", cat)
-    balloon[[cat]] <- toppData |>
+    balloon_list[[cat]] <- toppData |>
       dplyr::filter(Category == cat) |>
       dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
       dplyr::group_by(Cluster) |>
-      dplyr::slice_max(order_by=-nlog10_fdr, n=balloons, with_ties = F) |>
+      dplyr::slice_max(order_by=nlog10_fdr, n=balloons, with_ties = F) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
       ggplot(aes(
         x=forcats::fct_reorder(Name, Cluster),
@@ -218,11 +226,11 @@ toppBalloon <- function (toppData,
       )) +
       ggplot2::geom_point(aes(size=geneRatio, color=nlog10_fdr)) +
       viridis::scale_color_viridis(option = "C") +
-      ggplot2::labs(color="FDR", size="Genes") +
+      ggplot2::labs(color="-Log10(FDR)", size="Gene Ratio") +
       ggplot2::xlab(cat) +
       ggplot2::theme_bw() +
       ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = F)) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(size = 6, angle = 60, hjust=1.1, vjust=1.05),
+      ggplot2::theme(axis.text.x = ggplot2::element_text(size = x_axis_text_size, angle = 60, hjust=1.1, vjust=1.05),
                      panel.border = ggplot2::element_rect(color = NA))
 
       if (is.null(filename)) {
@@ -240,5 +248,10 @@ toppBalloon <- function (toppData,
   # if (length(balloon) == 1) {
   #   print(balloon[1])
   # }
-  return (balloon)
+  #return (balloon)
+  if (length(balloon_list) == 1){
+    balloon_list[[1]]
+  } else {
+    return (balloon_list)
+  }
 }
