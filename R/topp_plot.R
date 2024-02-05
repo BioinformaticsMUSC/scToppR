@@ -208,6 +208,7 @@ toppBalloon <- function (toppData,
     cat("Balloon Plot:", cat)
     balloon[[cat]] <- toppData |>
       dplyr::filter(Category == cat) |>
+      dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
       dplyr::group_by(Cluster) |>
       dplyr::slice_max(order_by=-nlog10_fdr, n=balloons, with_ties = F) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
