@@ -4,7 +4,7 @@
 #' @param topp_categories A string or vector with specific toppfun categories for the query
 #' @param cluster_col Column name for the groups of cells (e.g. cluster or celltype)
 #' @param gene_col Column name for genes (e.g. gene or feature)
-#' @param num_genes Number of genes per group to use for toppGene query (default = 20)
+#' @param num_genes Number of genes per group to use for toppGene query
 #' @param key_type Gene name format
 #' @param pval_cutoff (adjusted) P-value cutoff for filtering differentially expressed genes
 #' @param fc_filter Include "ALL" genes, or only "UPREG" or "DOWNREG" for each cluster
@@ -174,7 +174,7 @@ process_markers <- function (markers, cluster_col, gene_col,
     if (fc_filter == "ALL"){
       all_cl_markers <- all_cl_markers |>
         dplyr::filter(abs(!!as.name(avg_logFC_col)) > fc_cutoff) |>
-        dplyr::arrange(-!!as.name(avg_logFC_col)) |>
+        dplyr::arrange(-abs(!!as.name(avg_logFC_col))) |>
         dplyr::select(!!as.name(gene_col))
     } else if (fc_filter == "UPREG") {
       all_cl_markers <- all_cl_markers |>
