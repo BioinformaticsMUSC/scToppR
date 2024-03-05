@@ -190,16 +190,12 @@ process_markers <- function (markers, cluster_col, gene_col,
     if (!(is.null(num_genes))) {
       if (length(all_cl_markers[[gene_col]]) > num_genes) {
         marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
+      } else {
+        marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
       }
     } else {
       marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
     }
-    #print(marker_list[[cl]])
-    # if (length(marker_list) > genes_submit_cutoff) {
-    #   marker_list <- marker_list[1:genes_submit_cutoff]
-    # }
-  }
-  #print(marker_list)
   return (marker_list)
 }
 
