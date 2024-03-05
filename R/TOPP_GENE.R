@@ -196,6 +196,7 @@ process_markers <- function (markers, cluster_col, gene_col,
     } else {
       marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
     }
+    }
   return (marker_list)
 }
 
