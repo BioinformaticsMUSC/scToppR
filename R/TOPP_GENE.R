@@ -32,7 +32,7 @@ toppFun <- function(markers,
                     clusters = NULL,
                     correction="FDR",
                     key_type = "SYMBOL",
-                    min_genes=1,
+                    min_genes=2,
                     max_genes=1500,
                     max_results=50
                     ) {
@@ -83,11 +83,6 @@ toppFun <- function(markers,
     if (!(col %in% c('rank', 'X'))) {
       gene_list = marker_list[[col]]
 
-      if (length(gene_list) <= 1) {
-        cat("Cluster", col, "contains 1 or fewer genes and will be skipped\n")
-        missing_clusters = append(missing_clusters, col)
-        next
-      }
       if (sum(!(is.na(gene_list))) >= min_genes) {
         cat('Working on cluster:', col, '\n')
         d <- get_topp(gene_list = gene_list,
@@ -98,7 +93,7 @@ toppFun <- function(markers,
                       max_genes=max_genes,
                       max_results=max_results,
                       correction=correction)
-        #print(d)
+
         if (nrow(d) == 0){
           missing_clusters = append(missing_clusters, col)
         } else if (length(names(markers)) == 1) {
