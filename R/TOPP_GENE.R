@@ -331,8 +331,9 @@ toppSave <- function (toppData,
           this_file = stringr::str_glue("{filename}_{gr}.csv")
         }
 
-        write.csv(tmp_toppData,
+        write.table(tmp_toppData,
                   file = this_file,
+                  sep = "\t",
                   quote = FALSE,
                   row.names = FALSE,
                   col.names = TRUE)
@@ -362,7 +363,7 @@ toppSave <- function (toppData,
           this_file = stringr::str_glue("{filename}.xlsx")
         }
 
-        openxlsx::write.xlsx(tmp_toppData,
+        openxlsx::write.xlsx(toppData,
                              file = this_file,
                              colNames = TRUE,
                              rowNames = FALSE,
@@ -378,8 +379,9 @@ toppSave <- function (toppData,
           this_file = stringr::str_glue("{filename}.csv")
         }
 
-        write.csv(tmp_toppData,
+        write.table(toppData,
                   file = this_file,
+                  sep = ",",
                   quote = FALSE,
                   row.names = FALSE,
                   col.names = TRUE)
@@ -391,7 +393,7 @@ toppSave <- function (toppData,
         this_file = stringr::str_glue("{filename}.tsv")
       }
 
-      write.table(tmp_toppData,
+      write.table(toppData,
                   file = this_file,
                   sep = "\t",
                   quote = FALSE,

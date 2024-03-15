@@ -132,9 +132,10 @@ toppPlot <- function (toppData,
 
         if (isTRUE(save)) {
           if (is.null(filename)) {
-            filename = stringr::str_glue("{category}_{c}_toppDotPlot")
+            filename = stringr::str_glue("{category}_{c}_toppDotPlot.pdf")
+          } else {
+            filename = stringr::str_glue("{filename}_{category}_{c}_toppDotPlot.pdf")
           }
-          filename = paste0(filename, ".pdf")
           ggplot2::ggsave(filename = file.path(output_dir, filename),
                           width = width, height=height)
         }
@@ -176,9 +177,10 @@ toppPlot <- function (toppData,
 
       if (isTRUE(save)) {
         if (is.null(filename)) {
-          filename = stringr::str_glue("{category}_{c}_toppDotPlot")
+          filename = stringr::str_glue("{category}_{c}_toppDotPlot.pdf")
+        } else {
+          filename = stringr::str_glue("{filename}_{category}_{c}_toppDotPlot.pdf")
         }
-        filename = paste0(filename, ".pdf")
         ggplot2::ggsave(filename = file.path(output_dir, filename),
                         width = width, height=height)
         }
