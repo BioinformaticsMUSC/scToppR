@@ -66,7 +66,7 @@ plots <- toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters
 plots[1]
 ```
 
-This will create a list of plots for all categories and clusters requested. Here, the category "GenoOntologyMolecularFunction" was requested, and the `clusters` parameter was left NULL as default. If either `category` or `clusters` are NULL, then all available options are used. For example, the output here creates a list of plots for each cluster for the "GenoOntologyMolecularFunction". If multiple categories and all clusters are used, it will create a list of lists. This can get unwieldly, so the function can automatically save each plot as well, using the `save = TRUE` parameter. This will automatically save each file in the format: `{category}_{cluster}_dotplot.pdf`
+This will create a list of plots for all clusters in one specific category. Here, the category "GenoOntologyMolecularFunction" was requested, and the `clusters` parameter was left NULL as default. If `clusters` is NULL, then all available ones are used. For example, the output here creates a list of plots for each cluster for the "GenoOntologyMolecularFunction". If multiple clusters are selected, users can use `combine = TRUE` to return a patchwork object of plots. Leaving `combine = FALSE` returns a list of ggplot objects. If using the `save = TRUE` parameter, the function will automatically save each individual plot in the format: `{category}_{cluster}_dotplot.pdf`
 
 scToppR can also create balloon plots showing overlapping terms between all clusters.
 

@@ -1,7 +1,8 @@
 #' Create a dotplot from toppdata results
+#' NEW: this accepts only 1 category
 #'
 #' @param toppData A toppData results dataframe
-#' @param categories The topp categories to plot
+#' @param category The topp categories to plot
 #' @param clusters The cluster(s) to plot
 #' @param p_val_adj The P-value correction method: "BH", "Bonferroni", "BY", or "none"
 #' @param num_terms The number of terms from the toppData results to be plotted, per cluster
@@ -9,6 +10,7 @@
 #' @param save_dir Directory to save file
 #' @param width width of the saved file (inches)
 #' @param height height of the saved file (inches)
+#' @param filename file name if saving the plot
 #' @param y_axis_text_size Size of the Y axis text - for certain categories, it's helpful to decrease this
 #' @return ggplot
 #' @importFrom ggplot2 ggplot geom_point geom_segment scale_color_gradient theme_bw scale_y_discrete labs aes
@@ -16,33 +18,38 @@
 #' @importFrom stringr str_wrap
 #' @importFrom forcats fct_reorder
 #' @importFrom viridis scale_color_viridis
+#' @importFrom patchwork wrap_plots plot_annotation
 #' @export
 toppPlot <- function (toppData,
-                      categories = NULL,
+                      category,
                       clusters = NULL,
                       num_terms = 10,
                       p_val_adj="BH",
                       p_val_display="log",
                       save = FALSE,
                       save_dir = NULL,
+                      save_prefix = NULL,
                       width = 5,
                       height = 6,
-                      y_axis_text_size=8) {
-  #check toppData object - check for columns? - check that clusters and category are in data
-  if ((is.null(categories))|(length(categories) > 1)) {
-    if ((is.null(clusters))|(length(clusters) > 1)) {
-      stop("Please select only 1 of categories OR clusters.")
-    }
-  }
+                      filename = NULL,
+                      y_axis_text_size=8,
+                      combine = FALSE,
+                      ncols = NULL,
+                      ...) {
+  #check for correct columns
   test_cols = c("Category", "Name", "PValue", "GenesInTerm", "GenesInQuery", "GenesInTermInQuery")
   for (t in test_cols) {
     if (!(t %in% colnames(toppData))) {
       stop(paste0("The column ", t, " is missing from the toppData, please correct and retry."))
     }
   }
-  #parse category
-  if (is.null(categories)){
-    categories = unique(toppData$Category)
+  #parse category - make sure it's in data and there is only 1
+  if (!(category %in% unique(toppData$Category))){
+    stop(paste0("Category ", category, " not found in the data. Please select one of ",
+                stringr::str_c(unique(toppData$Category), collapse = ", ")))
+  } else if (is.null(category)){
+    stop(paste0("Please select one of these categories: ",
+                stringr::str_c(unique(toppData$Category), collapse = ", ")))
   }
 
   #parse clusters
@@ -60,7 +67,7 @@ toppPlot <- function (toppData,
     cat("P value adjustment not found - using 'BH' by default. For no adjustment, use p_val_adj = 'none'.")
   }
 
-  
+
   p_val_col = switch(p_val_adj,
                      "BH" = "QValueFDRBH",
                      "Bonferroni" = "QValueBonferroni",
@@ -83,16 +90,6 @@ toppPlot <- function (toppData,
     p_val_display_column = p_val_col
   }
 
-  #
-  
-  # if (p_val_display == "log") {
-  #   #create nlog10_fdr column
-  #   tmp_data <- tmp_data |>
-  #     dplyr::mutate(nlog10_fdr = -log10(!!as.name(p_val_col)))
-  #   p_val_display_column = "nlog10_fdr"
-  # }
-
-
   #parse save
   if (isTRUE(save)) {
     if (is.null(save_dir)) {
@@ -106,15 +103,14 @@ toppPlot <- function (toppData,
   ###MAIN PLOTTING SECTION
   ###
   if (length(clusters) > 1) {
-    cat("Multiple clusters entered: function returns a list of ggplots")
-
+    if (!isTRUE(combine)) {
+      cat("Multiple clusters entered: function returns a list of ggplots\n")
+    }
     overall_plot_list = list()
-    for (cat in categories) {
-      category_plot_list = list()
       for (c in clusters) {
-        category_plot_list[[c]] <- tmp_data |>
+        overall_plot_list[[c]] <- tmp_data |>
           dplyr::filter(Cluster == c) |>
-          dplyr::filter(Category == cat) |>
+          dplyr::filter(Category == category) |>
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
           dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
           dplyr::arrange(-geneRatio) |>
@@ -128,58 +124,70 @@ toppPlot <- function (toppData,
           ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
           viridis::scale_color_viridis(option = "C")  +
           ggplot2::theme_bw() +
-          ggplot2::ylab(cat) +
+          ggplot2::ylab(category) +
           ggplot2::ggtitle(stringr::str_glue("Cluster {c}")) +
           ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
           ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = F)) +
           ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
 
         if (isTRUE(save)) {
-          filename = stringr::str_glue("{cat}_{c}_toppDotPlot.pdf")
+          if (is.null(filename)) {
+            filename = stringr::str_glue("{category}_{c}_toppDotPlot")
+          }
+          filename = paste0(filename, ".pdf")
           ggplot2::ggsave(filename = file.path(output_dir, filename),
                           width = width, height=height)
         }
       }
-      overall_plot_list[[cat]] <- category_plot_list
-    }
-    return (overall_plot_list)
-  } else if (length(clusters) == 1) {
-    category_plot_list = list()
-    c = clusters[1]
-      for (cat in categories) {
-        category_plot_list[[cat]] <- tmp_data |>
-          dplyr::filter(Cluster == c) |>
-          dplyr::filter(Category == cat) |>
-          dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-          dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
-          dplyr::arrange(-geneRatio) |>
-          head(num_terms) |>
 
-          ggplot2::ggplot(mapping = aes(
-            x = geneRatio,
-            y = Name
-          )) +
-          ggplot2::geom_segment(aes(xend=0, yend=Name)) +
-          ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
-          viridis::scale_color_viridis(option = "C")  +
-          ggplot2::theme_bw() +
-          ggplot2::ylab(cat) +
-          ggplot2::ggtitle(stringr::str_glue("Cluster: {c}")) +
-          ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
-          ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = F)) +
-          ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
-
-        if (isTRUE(save)) {
-          filename = stringr::str_glue("{cat}_{c}_toppDotPlot.pdf")
-          ggplot2::ggsave(filename = file.path(output_dir, filename),
-                          width = width, height=height)
-          }
+    if (isTRUE(combine)){
+      if (is.null(ncols)) {
+        ncols = min(3, length(overall_plot_list))
       }
-    if (length(category_plot_list) == 1){
-      category_plot_list[[1]]
+      combined_plots = patchwork::wrap_plots(overall_plot_list, ncol = ncols) +
+        patchwork::plot_annotation(title=category)
+      return (combined_plots)
     } else {
-      return (category_plot_list)
+      return (overall_plot_list)
     }
+  } else if (length(clusters) == 1) {
+    c = clusters[1]
+      single_plot <- tmp_data |>
+        dplyr::filter(Cluster == c) |>
+        dplyr::filter(Category == category) |>
+        dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
+        dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
+        dplyr::arrange(-geneRatio) |>
+        head(num_terms) |>
+
+        ggplot2::ggplot(mapping = aes(
+          x = geneRatio,
+          y = Name
+        )) +
+        ggplot2::geom_segment(aes(xend=0, yend=Name)) +
+        ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
+        viridis::scale_color_viridis(option = "C")  +
+        ggplot2::theme_bw() +
+        ggplot2::ylab(category) +
+        ggplot2::ggtitle(stringr::str_glue("Cluster: {c}")) +
+        ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
+        ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = F)) +
+        ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
+
+      if (isTRUE(save)) {
+        if (is.null(filename)) {
+          filename = stringr::str_glue("{category}_{c}_toppDotPlot")
+        }
+        filename = paste0(filename, ".pdf")
+        ggplot2::ggsave(filename = file.path(output_dir, filename),
+                        width = width, height=height)
+        }
+    return (single_plot)
+    # if (length(category_plot_list) == 1){
+    #   category_plot_list[[1]]
+    # } else {
+    #   return (category_plot_list)
+    # }
   }
 }
 

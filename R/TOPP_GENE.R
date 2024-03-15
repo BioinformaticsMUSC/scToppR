@@ -234,7 +234,9 @@ get_topp <- function(gene_list,
   payload[['Categories']] = category_list
 
   data = rjson::toJSON(payload)
-
+  if(length(new_gene_list) == 1) {  ####
+    data = paste0("{\"Genes\":[", new_gene_list,"],\"Categories\":", rjson::toJSON( payload[['Categories']]), "}") ####
+  }
   #send POST request
   url = 'https://toppgene.cchmc.org/API/enrich'
   r <- httr::POST(url = url,
