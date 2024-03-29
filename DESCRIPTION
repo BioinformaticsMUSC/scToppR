@@ -3,7 +3,7 @@ Title: API Wrapper for ToppGene
 Version: 0.1.1.2000
 Authors@R: 
     person("Bryan", "Granger", , "grangerb@musc.edu", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: scToppR provides an easy-to-use API wrapper for the ToppGene web platform, used for gene ontology and functional enrichment research. The package also integrates visualization tools, making it a convenient tool directly connecting ToppGene to code-based workflows in R.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
