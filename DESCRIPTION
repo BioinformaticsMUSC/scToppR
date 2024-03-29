@@ -1,6 +1,6 @@
 Package: scToppR
 Title: API Wrapper for ToppGene
-Version: 0.1.1.2000
+Version: 0.99.10
 Authors@R: 
     person("Bryan", "Granger", , "grangerb@musc.edu", role = c("aut", "cre"))
 Description: scToppR provides an easy-to-use API wrapper for the ToppGene web platform, used for gene ontology and functional enrichment research. The package also integrates visualization tools, making it a convenient tool directly connecting ToppGene to code-based workflows in R.
@@ -16,11 +16,15 @@ Imports:
     rjson,
     stringr,
     openxlsx,
-    viridis
+    viridis,
+    patchwork
 Depends: 
-    R (>= 2.10)
-LazyData: true
+    R (>= 4.3.0)
+LazyData: false
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+biocViews: Pathways, SingleCell
+BugReports: https://github.com/BioinformaticsMUSC/scToppR
+URL: https://github.com/BioinformaticsMUSC/scToppR

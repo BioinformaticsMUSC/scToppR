@@ -36,3 +36,7 @@ ggplot
 \description{
 Create a balloon plot from toppdata results
 }
+\examples{
+toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
+
+}

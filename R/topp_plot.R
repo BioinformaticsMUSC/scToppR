@@ -19,6 +19,9 @@
 #' @importFrom forcats fct_reorder
 #' @importFrom viridis scale_color_viridis
 #' @importFrom patchwork wrap_plots plot_annotation
+#' @examples
+#' toppPlot(toppData, category="GeneOntologyMolecularFunction", clusters=0, save=TRUE, save_prefix="MF_cluster0")
+#'
 #' @export
 toppPlot <- function (toppData,
                       category,
@@ -208,6 +211,9 @@ toppPlot <- function (toppData,
 #' @importFrom stringr str_wrap str_glue
 #' @importFrom forcats fct_reorder
 #' @importFrom viridis scale_color_viridis
+#' @examples
+#' toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
+#'
 #' @export
 toppBalloon <- function (toppData,
                          categories = NULL,

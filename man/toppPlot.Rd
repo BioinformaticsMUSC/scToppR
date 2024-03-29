@@ -54,3 +54,7 @@ ggplot
 Create a dotplot from toppdata results
 NEW: this accepts only 1 category
 }
+\examples{
+toppPlot(toppData, category="GeneOntologyMolecularFunction", clusters=0, save=TRUE, save_prefix="MF_cluster0")
+
+}
