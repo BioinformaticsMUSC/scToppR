@@ -2,25 +2,32 @@
 % Please edit documentation in R/topp_plot.R
 \name{toppPlot}
 \alias{toppPlot}
-\title{Create a dotplot from toppdata results}
+\title{Create a dotplot from toppdata results
+NEW: this accepts only 1 category}
 \usage{
 toppPlot(
   toppData,
-  categories = NULL,
+  category,
   clusters = NULL,
   num_terms = 10,
   p_val_adj = "BH",
+  p_val_display = "log",
   save = FALSE,
   save_dir = NULL,
+  save_prefix = NULL,
   width = 5,
   height = 6,
-  y_axis_text_size = 8
+  filename = NULL,
+  y_axis_text_size = 8,
+  combine = FALSE,
+  ncols = NULL,
+  ...
 )
 }
 \arguments{
 \item{toppData}{A toppData results dataframe}
 
-\item{categories}{The topp categories to plot}
+\item{category}{The topp categories to plot}
 
 \item{clusters}{The cluster(s) to plot}
 
@@ -36,6 +43,8 @@ toppPlot(
 
 \item{height}{height of the saved file (inches)}
 
+\item{filename}{file name if saving the plot}
+
 \item{y_axis_text_size}{Size of the Y axis text - for certain categories, it's helpful to decrease this}
 }
 \value{
@@ -43,4 +52,5 @@ ggplot
 }
 \description{
 Create a dotplot from toppdata results
+NEW: this accepts only 1 category
 }

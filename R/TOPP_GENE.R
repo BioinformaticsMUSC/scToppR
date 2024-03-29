@@ -4,6 +4,8 @@
 #' @param topp_categories A string or vector with specific toppfun categories for the query
 #' @param cluster_col Column name for the groups of cells (e.g. cluster or celltype)
 #' @param gene_col Column name for genes (e.g. gene or feature)
+#' @param logFC_col Column name for the avg log FC column
+#' @param p_val_col Column name for the p-value or adjusted p-value (preferred)
 #' @param num_genes Number of genes per group to use for toppGene query
 #' @param key_type Gene name format
 #' @param pval_cutoff (adjusted) P-value cutoff for filtering differentially expressed genes
@@ -24,11 +26,12 @@ toppFun <- function(markers,
                     topp_categories = NULL,
                     cluster_col = "cluster",
                     gene_col = "gene",
-                    num_genes = NULL,
+                    p_val_col = "adj_p_val_col",
+                    logFC_col = "avg_logFC",
+                    num_genes = 1000,
                     pval_cutoff = 0.5,
                     fc_cutoff = 0,
                     fc_filter = "ALL",
-                    genes_submit_cutoff = 1000,
                     clusters = NULL,
                     correction="FDR",
                     key_type = "SYMBOL",
@@ -53,14 +56,13 @@ toppFun <- function(markers,
     marker_list <- process_markers(markers=markers,
                                     cluster_col=cluster_col,
                                     gene_col=gene_col,
+                                    p_val_col = p_val_col,
+                                   logFC_col = logFC_col,
                                     num_genes=num_genes,
                                     pval_cutoff=pval_cutoff,
                                    fc_cutoff = fc_cutoff,
                                    genes_submit_cutoff=genes_submit_cutoff,
-                                    fc_filter=fc_filter,
-                                    avg_logFC_col="avg_logFC",
-                                    p_val_col="p_val",
-                                    adj_p_val_col="p_val_adj")
+                                    fc_filter=fc_filter)
   } else {
     stop("data format not recognized")
   }
@@ -128,12 +130,10 @@ toppFun <- function(markers,
 #' @export
 get_Entrez<- function(genes){
   lookup_url = 'https://toppgene.cchmc.org/API/lookup'
-  payload = rjson::toJSON(list(Symbols=genes))
-
   r <- httr::POST(url = lookup_url,
-            body = payload)
+            body = list(Symbols=genes),
+            encode="json")
   new_gene_list = c()
-
   for (g in httr::content(r)$Genes) {
     new_gene_list <- base::append(new_gene_list, g[['Entrez']])
   }
@@ -141,27 +141,15 @@ get_Entrez<- function(genes){
 }
 
 ##### PROCESS MARKER INPUTS
-process_markers <- function (markers, cluster_col, gene_col,
+process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_col,
                              num_genes=1000,
                              pval_cutoff=0.5,
                              fc_cutoff=0,
                              fc_filter="ALL",
-                             genes_submit_cutoff=1000,
-                             avg_logFC_col="avg_logFC",
-                             p_val_col="p_val",
-                             adj_p_val_col="p_val_adj") {
+                             genes_submit_cutoff=1000) {
 
 
   #parse columns - tries to find columns if differ from the default
-  if (!(avg_logFC_col %in% colnames(markers))) {
-    avg_logFC_col = stringr::str_subset(colnames(markers),
-                                        pattern="avg")
-
-  }
-  if (!(adj_p_val_col %in% colnames(markers))) {
-    adj_p_val_col = stringr::str_subset(colnames(markers),
-                                        pattern="adj")
-  }
 
   #Make a list of lists - each sub list has all of the genes (up to num_genes if specified) of the filtered data
   marker_list = list()
@@ -169,21 +157,21 @@ process_markers <- function (markers, cluster_col, gene_col,
   for (cl in unique(markers[[cluster_col]])) {
     all_cl_markers <- markers |>
       dplyr::filter(!!as.name(cluster_col) == cl) |>
-      dplyr::filter(!!as.name(adj_p_val_col) < pval_cutoff)
+      dplyr::filter(!!as.name(p_val_col) < pval_cutoff)
     if (fc_filter == "ALL"){
       all_cl_markers <- all_cl_markers |>
-        dplyr::filter(abs(!!as.name(avg_logFC_col)) > fc_cutoff) |>
-        dplyr::arrange(-abs(!!as.name(avg_logFC_col))) |>
+        dplyr::filter(abs(!!as.name(logFC_col)) > fc_cutoff) |>
+        dplyr::arrange(-abs(!!as.name(logFC_col))) |>
         dplyr::select(!!as.name(gene_col))
     } else if (fc_filter == "UPREG") {
       all_cl_markers <- all_cl_markers |>
-        dplyr::filter(!!as.name(avg_logFC_col) > fc_cutoff) |>
-        dplyr::arrange(-!!as.name(avg_logFC_col)) |>
+        dplyr::filter(!!as.name(logFC_col) > fc_cutoff) |>
+        dplyr::arrange(-!!as.name(logFC_col)) |>
         dplyr::select(!!as.name(gene_col))
     } else if (fc_filter == "DOWNREG") {
       all_cl_markers <- all_cl_markers |>
-        dplyr::filter(!!as.name(avg_logFC_col) < fc_cutoff) |>
-        dplyr::arrange(!!as.name(avg_logFC_col)) |>
+        dplyr::filter(!!as.name(logFC_col) < fc_cutoff) |>
+        dplyr::arrange(!!as.name(logFC_col)) |>
         dplyr::select(!!as.name(gene_col))
     }
     if (!(is.null(num_genes))) {

@@ -9,14 +9,16 @@ toppFun(
   topp_categories = NULL,
   cluster_col = "cluster",
   gene_col = "gene",
-  num_genes = 20,
+  p_val_col = "adj_p_val_col",
+  logFC_col = "avg_logFC",
+  num_genes = 1000,
   pval_cutoff = 0.5,
   fc_cutoff = 0,
   fc_filter = "ALL",
   clusters = NULL,
   correction = "FDR",
   key_type = "SYMBOL",
-  min_genes = 1,
+  min_genes = 2,
   max_genes = 1500,
   max_results = 50
 )
@@ -30,7 +32,11 @@ toppFun(
 
 \item{gene_col}{Column name for genes (e.g. gene or feature)}
 
-\item{num_genes}{Number of genes per group to use for toppGene query (default = 20)}
+\item{p_val_col}{Column name for the p-value or adjusted p-value (preferred)}
+
+\item{logFC_col}{Column name for the avg log FC column}
+
+\item{num_genes}{Number of genes per group to use for toppGene query}
 
 \item{pval_cutoff}{(adjusted) P-value cutoff for filtering differentially expressed genes}
 

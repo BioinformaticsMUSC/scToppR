@@ -8,6 +8,7 @@ toppBalloon(
   toppData,
   categories = NULL,
   balloons = 3,
+  x_axis_text_size = 6,
   filename = NULL,
   save = FALSE,
   height = 5,
