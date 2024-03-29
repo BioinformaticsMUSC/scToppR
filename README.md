@@ -19,7 +19,7 @@ library(scToppR)
 
 To query ToppGene and create a dataframe of results, use the function `toppFun`. The function takes as inputs a list or table of top markers (with clusters/cell types as columns) and a list of any ToppGene categories (e.g. "GeneOntologyMolecularFunction" and/or "ToppGene")
 
-Input data: the input for `toppData` is a dataframe similar to FindAllMarkers (Seurat) or Wilcoxauc (Presto) outputs. The dataframe needs a columns to determine genes, groups of cells (e.g., clusters or celltypes), average log fold changes, and p-values. 
+Input data: the input for `toppData` is a dataframe similar to FindAllMarkers (Seurat) or Wilcoxauc (Presto) outputs. The dataframe needs columns to determine genes, groups of cells (e.g., clusters or celltypes), average log fold changes, and p-values. 
 
 The package includes example data in the FindAllMarkers format, using the PBMC 3K dataset from the Seurat guided clustering tutorial.
 
