@@ -130,10 +130,13 @@ toppFun <- function(markers,
 #' @export
 get_Entrez<- function(genes){
   lookup_url = 'https://toppgene.cchmc.org/API/lookup'
+  payload = rjson::toJSON(list(Symbols=genes))
+  if(length(genes) == 1){
+    payload = paste0("{\"Symbols\":[\"", genes,"\"]}")
+  }
   r <- httr::POST(url = lookup_url,
-            body = list(Symbols=genes),
-            encode="json")
-  new_gene_list = c()
+                  body = payload)
+  new_gene_list <- c()
   for (g in httr::content(r)$Genes) {
     new_gene_list <- base::append(new_gene_list, g[['Entrez']])
   }
