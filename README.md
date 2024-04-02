@@ -50,7 +50,7 @@ Once a toppData dataframe is created, it can be used to create a dotplot or ball
 Example code for dotplot
 
 ```         
-toppPlot(toppData, category = "ToppCell", clusters = "1", save = T, num_terms = 10)
+toppPlot(toppData, category = "ToppCell", clusters = "1", save = TRUE, num_terms = 10)
 ```
 
 ![DotPlot of toppData results](/examples/toppplot_example.png)

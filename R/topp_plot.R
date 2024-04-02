@@ -130,7 +130,7 @@ toppPlot <- function (toppData,
           ggplot2::ylab(category) +
           ggplot2::ggtitle(stringr::str_glue("Cluster {c}")) +
           ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
-          ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = F)) +
+          ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = FALSE)) +
           ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
 
         if (isTRUE(save)) {
@@ -175,7 +175,7 @@ toppPlot <- function (toppData,
         ggplot2::ylab(category) +
         ggplot2::ggtitle(stringr::str_glue("Cluster: {c}")) +
         ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
-        ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = F)) +
+        ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = FALSE)) +
         ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
 
       if (isTRUE(save)) {
@@ -234,7 +234,7 @@ toppBalloon <- function (toppData,
       dplyr::filter(Category == cat) |>
       dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
       dplyr::group_by(Cluster) |>
-      dplyr::slice_max(order_by=nlog10_fdr, n=balloons, with_ties = F) |>
+      dplyr::slice_max(order_by=nlog10_fdr, n=balloons, with_ties = FALSE) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
       ggplot(aes(
         x=forcats::fct_reorder(Name, Cluster),
@@ -245,7 +245,7 @@ toppBalloon <- function (toppData,
       ggplot2::labs(color="-Log10(FDR)", size="Gene Ratio") +
       ggplot2::xlab(cat) +
       ggplot2::theme_bw() +
-      ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = F)) +
+      ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = FALSE)) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(size = x_axis_text_size, angle = 60, hjust=1.1, vjust=1.05),
                      panel.border = ggplot2::element_rect(color = NA))
 

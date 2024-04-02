@@ -283,6 +283,7 @@ get_ToppCats <- function() {
 #' @param filename filename prefix for each split file
 #' @param split Boolean, whether to split the dataframe by celltype/cluster
 #' @param format Saved file format, one of c("xlsx", "csv", "tsv")
+#' @returns A saved file
 #' @importFrom openxlsx write.xlsx
 #' @importFrom stringr str_glue
 #' @importFrom dplyr filter

@@ -15,6 +15,9 @@ toppSave(toppData, filename = NULL, split = TRUE, format = "xlsx")
 
 \item{format}{Saved file format, one of c("xlsx", "csv", "tsv")}
 }
+\value{
+A saved file
+}
 \description{
 Save toppData results (optionally) split by celltype/cluster
 }
