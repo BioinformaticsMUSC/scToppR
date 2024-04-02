@@ -313,7 +313,7 @@ toppSave <- function (toppData,
                              rowNames = FALSE,
                              borders = "columns",
                              sheetName="toppData",
-                             overwrite=T)
+                             overwrite = TRUE)
         cat("Saving file:", this_file, "\n")
 
       } else if (format == "csv") {
@@ -361,7 +361,7 @@ toppSave <- function (toppData,
                              rowNames = FALSE,
                              borders = "columns",
                              sheetName="toppData",
-                             overwrite=T)
+                             overwrite = TRUE)
         cat("Saving file:", this_file, "\n")
 
       } else if (format == "csv") {
