@@ -38,7 +38,9 @@ With this data we can run the function `toppFun` to get results from ToppGene.
 toppData <- toppFun(markers = pbmc.markers,
                     topp_categories = NULL, 
                     cluster_col = "cluster", 
-                    gene_col = "gene")
+                    gene_col = "gene",
+                    p_val_col = "p_val_adj",
+                    logFC_col = "avg_log2FC")
 
 ```
 

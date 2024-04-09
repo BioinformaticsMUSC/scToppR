@@ -22,6 +22,8 @@ toppBalloon(
 
 \item{balloons}{Number of balloons per group to plot}
 
+\item{x_axis_text_size}{Size of the text on the x axis}
+
 \item{filename}{Filename of the saved balloon plot}
 
 \item{save}{Save the balloon plot if TRUE}
@@ -37,6 +39,7 @@ ggplot
 Create a balloon plot from toppdata results
 }
 \examples{
+data("toppData")
 toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
 
 }

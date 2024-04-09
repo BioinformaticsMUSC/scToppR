@@ -22,5 +22,6 @@ A saved file
 Save toppData results (optionally) split by celltype/cluster
 }
 \examples{
+data("toppData")
 toppSave(toppData, filename="toppFun_results", split = TRUE, format = "xlsx")
 }

@@ -5,12 +5,15 @@
 #' @param category The topp categories to plot
 #' @param clusters The cluster(s) to plot
 #' @param p_val_adj The P-value correction method: "BH", "Bonferroni", "BY", or "none"
+#' @param p_val_display If "log", display the p-value in terms of -log10(p_value)
 #' @param num_terms The number of terms from the toppData results to be plotted, per cluster
 #' @param save Whether to save the file automatically
 #' @param save_dir Directory to save file
 #' @param width width of the saved file (inches)
 #' @param height height of the saved file (inches)
 #' @param filename file name if saving the plot
+#' @param combine If TRUE and multiple clusters selected, return a patchwork object of all plots; if FALSE return list of plots
+#' @param ncols If patchwork element returned, number of columns for subplots
 #' @param y_axis_text_size Size of the Y axis text - for certain categories, it's helpful to decrease this
 #' @return ggplot
 #' @importFrom ggplot2 ggplot geom_point geom_segment scale_color_gradient theme_bw scale_y_discrete labs aes
@@ -19,8 +22,14 @@
 #' @importFrom forcats fct_reorder
 #' @importFrom viridis scale_color_viridis
 #' @importFrom patchwork wrap_plots plot_annotation
+#' @importFrom utils head
 #' @examples
-#' toppPlot(toppData, category="GeneOntologyMolecularFunction", clusters=0, save=TRUE, save_prefix="MF_cluster0")
+#' data("toppData")
+#' toppPlot(toppData,
+#'     category="GeneOntologyMolecularFunction",
+#'     clusters=0,
+#'     save=TRUE,
+#'     filename="MF_cluster0")
 #'
 #' @export
 toppPlot <- function (toppData,
@@ -31,14 +40,12 @@ toppPlot <- function (toppData,
                       p_val_display="log",
                       save = FALSE,
                       save_dir = NULL,
-                      save_prefix = NULL,
                       width = 5,
                       height = 6,
                       filename = NULL,
                       y_axis_text_size=8,
                       combine = FALSE,
-                      ncols = NULL,
-                      ...) {
+                      ncols = NULL) {
   #check for correct columns
   test_cols = c("Category", "Name", "PValue", "GenesInTerm", "GenesInQuery", "GenesInTermInQuery")
   for (t in test_cols) {
@@ -117,7 +124,7 @@ toppPlot <- function (toppData,
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
           dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
           dplyr::arrange(-geneRatio) |>
-          head(num_terms) |>
+          utils::head(num_terms) |>
 
           ggplot2::ggplot(mapping = aes(
             x = geneRatio,
@@ -162,7 +169,7 @@ toppPlot <- function (toppData,
         dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
         dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
         dplyr::arrange(-geneRatio) |>
-        head(num_terms) |>
+        utils::head(num_terms) |>
 
         ggplot2::ggplot(mapping = aes(
           x = geneRatio,
@@ -205,6 +212,7 @@ toppPlot <- function (toppData,
 #' @param save Save the balloon plot if TRUE
 #' @param height Height of the saved balloon plot
 #' @param width Width of the saved balloon plot
+#' @param x_axis_text_size Size of the text on the x axis
 #' @return ggplot
 #' @importFrom ggplot2 ggplot geom_point theme scale_x_discrete theme_bw labs aes xlab ggsave
 #' @importFrom dplyr group_by mutate slice_max
@@ -212,6 +220,7 @@ toppPlot <- function (toppData,
 #' @importFrom forcats fct_reorder
 #' @importFrom viridis scale_color_viridis
 #' @examples
+#' data("toppData")
 #' toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
 #'
 #' @export

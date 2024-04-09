@@ -14,14 +14,12 @@ toppPlot(
   p_val_display = "log",
   save = FALSE,
   save_dir = NULL,
-  save_prefix = NULL,
   width = 5,
   height = 6,
   filename = NULL,
   y_axis_text_size = 8,
   combine = FALSE,
-  ncols = NULL,
-  ...
+  ncols = NULL
 )
 }
 \arguments{
@@ -35,6 +33,8 @@ toppPlot(
 
 \item{p_val_adj}{The P-value correction method: "BH", "Bonferroni", "BY", or "none"}
 
+\item{p_val_display}{If "log", display the p-value in terms of -log10(p_value)}
+
 \item{save}{Whether to save the file automatically}
 
 \item{save_dir}{Directory to save file}
@@ -46,6 +46,10 @@ toppPlot(
 \item{filename}{file name if saving the plot}
 
 \item{y_axis_text_size}{Size of the Y axis text - for certain categories, it's helpful to decrease this}
+
+\item{combine}{If TRUE and multiple clusters selected, return a patchwork object of all plots; if FALSE return list of plots}
+
+\item{ncols}{If patchwork element returned, number of columns for subplots}
 }
 \value{
 ggplot
@@ -55,6 +59,11 @@ Create a dotplot from toppdata results
 NEW: this accepts only 1 category
 }
 \examples{
-toppPlot(toppData, category="GeneOntologyMolecularFunction", clusters=0, save=TRUE, save_prefix="MF_cluster0")
+data("toppData")
+toppPlot(toppData,
+    category="GeneOntologyMolecularFunction",
+    clusters=0,
+    save=TRUE,
+    filename="MF_cluster0")
 
 }

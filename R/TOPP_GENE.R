@@ -20,7 +20,13 @@
 #' @importFrom dplyr filter arrange select
 #' @return data.frame
 #' @examples
-#' toppFun(markers=marker_table, topp_categories="GeneOntologyBiologicalProcess", key_type="SYMBOL")
+#' data("pbmc.markers")
+#' toppData <- toppFun(pbmc.markers,
+#'     topp_categories = NULL,
+#'     cluster_col = "cluster",
+#'     gene_col = "gene",
+#'     p_val_col = "p_val_adj",
+#'     logFC_col = "avg_log2FC")
 #' @export
 toppFun <- function(markers,
                     topp_categories = NULL,
@@ -287,7 +293,9 @@ get_ToppCats <- function() {
 #' @importFrom openxlsx write.xlsx
 #' @importFrom stringr str_glue
 #' @importFrom dplyr filter
+#' @importFrom utils write.table
 #' @examples
+#' data("toppData")
 #' toppSave(toppData, filename="toppFun_results", split = TRUE, format = "xlsx")
 #' @export
 toppSave <- function (toppData,
@@ -323,7 +331,7 @@ toppSave <- function (toppData,
           this_file = stringr::str_glue("{filename}_{gr}.csv")
         }
 
-        write.table(tmp_toppData,
+        utils::write.table(tmp_toppData,
                   file = this_file,
                   sep = "\t",
                   quote = FALSE,
@@ -337,7 +345,7 @@ toppSave <- function (toppData,
         this_file = stringr::str_glue("{filename}_{gr}.tsv")
       }
 
-        write.table(tmp_toppData,
+        utils::write.table(tmp_toppData,
                   file = this_file,
                   sep = "\t",
                   quote = FALSE,
@@ -371,7 +379,7 @@ toppSave <- function (toppData,
           this_file = stringr::str_glue("{filename}.csv")
         }
 
-        write.table(toppData,
+        utils::write.table(toppData,
                   file = this_file,
                   sep = ",",
                   quote = FALSE,
@@ -385,7 +393,7 @@ toppSave <- function (toppData,
         this_file = stringr::str_glue("{filename}.tsv")
       }
 
-      write.table(toppData,
+      utils::write.table(toppData,
                   file = this_file,
                   sep = "\t",
                   quote = FALSE,

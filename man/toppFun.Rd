@@ -63,5 +63,11 @@ data.frame
 Get results from ToppFun
 }
 \examples{
-toppFun(markers=marker_table, topp_categories="GeneOntologyBiologicalProcess", key_type="SYMBOL")
+data("pbmc.markers")
+toppData <- toppFun(pbmc.markers,
+    topp_categories = NULL,
+    cluster_col = "cluster",
+    gene_col = "gene",
+    p_val_col = "p_val_adj",
+    logFC_col = "avg_log2FC")
 }
