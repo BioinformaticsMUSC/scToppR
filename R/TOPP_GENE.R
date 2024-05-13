@@ -52,6 +52,9 @@ toppFun <- function(markers,
       dplyr::filter(!!as.name(cluster_col) %in% clusters)
   }
 
+  if (!(cluster_col %in% colnames(markers))) {
+    stop(paste0("Cluster column `", cluster_col, "` not found in data. Please specify."))
+  }
   #parse fc_filter
   if (!(fc_filter %in% c("ALL", "UPREG", "DOWNREG"))){
     stop("please select one of c('ALL', 'UPREG', 'DOWNREG') for fc_filter")
