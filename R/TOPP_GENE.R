@@ -188,12 +188,12 @@ process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_co
     }
     if (!(is.null(num_genes))) {
       if (length(all_cl_markers[[gene_col]]) > num_genes) {
-        marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
+        marker_list[[paste0("c",cl)]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
       } else {
-        marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
+        marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
       }
     } else {
-      marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
+      marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
     }
     }
   return (marker_list)
