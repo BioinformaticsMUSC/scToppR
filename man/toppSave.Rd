@@ -4,7 +4,13 @@
 \alias{toppSave}
 \title{Save toppData results (optionally) split by celltype/cluster}
 \usage{
-toppSave(toppData, filename = NULL, split = TRUE, format = "xlsx")
+toppSave(
+  toppData,
+  filename = NULL,
+  save_dir = NULL,
+  split = TRUE,
+  format = "xlsx"
+)
 }
 \arguments{
 \item{toppData}{Results from toppFun as a dataframe}

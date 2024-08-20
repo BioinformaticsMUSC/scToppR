@@ -186,14 +186,23 @@ process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_co
         dplyr::arrange(!!as.name(logFC_col)) |>
         dplyr::select(!!as.name(gene_col))
     }
+    # if (!(is.null(num_genes))) {
+    #   if (length(all_cl_markers[[gene_col]]) > num_genes) {
+    #     marker_list[[paste0("c",cl)]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
+    #   } else {
+    #     marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
+    #   }
+    # } else {
+    #   marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
+    # }
     if (!(is.null(num_genes))) {
       if (length(all_cl_markers[[gene_col]]) > num_genes) {
-        marker_list[[paste0("c",cl)]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
+        marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
       } else {
-        marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
+        marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
       }
     } else {
-      marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
+      marker_list[[cl]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
     }
     }
   return (marker_list)
@@ -303,8 +312,12 @@ get_ToppCats <- function() {
 #' @export
 toppSave <- function (toppData,
                       filename = NULL,
+                      save_dir = NULL,
                       split = TRUE,
                       format = "xlsx") {
+  if (is.null(save_dir)) {
+    save_dir = getwd()
+  }
   if (isTRUE(split)) {
     for (gr in unique(toppData$Cluster)) {
       tmp_toppData <- toppData |>
@@ -319,7 +332,7 @@ toppSave <- function (toppData,
         }
 
         openxlsx::write.xlsx(tmp_toppData,
-                             file = this_file,
+                             file = file.path(save_dir, this_file),
                              colNames = TRUE,
                              rowNames = FALSE,
                              borders = "columns",
@@ -335,7 +348,7 @@ toppSave <- function (toppData,
         }
 
         utils::write.table(tmp_toppData,
-                  file = this_file,
+                  file = file.path(save_dir, this_file),
                   sep = "\t",
                   quote = FALSE,
                   row.names = FALSE,
@@ -349,7 +362,7 @@ toppSave <- function (toppData,
       }
 
         utils::write.table(tmp_toppData,
-                  file = this_file,
+                  file = file.path(save_dir, this_file),
                   sep = "\t",
                   quote = FALSE,
                   row.names = FALSE,
@@ -367,7 +380,7 @@ toppSave <- function (toppData,
         }
 
         openxlsx::write.xlsx(toppData,
-                             file = this_file,
+                             file = file.path(save_dir, this_file),
                              colNames = TRUE,
                              rowNames = FALSE,
                              borders = "columns",
@@ -383,7 +396,7 @@ toppSave <- function (toppData,
         }
 
         utils::write.table(toppData,
-                  file = this_file,
+                  file = file.path(save_dir, this_file),
                   sep = ",",
                   quote = FALSE,
                   row.names = FALSE,
@@ -397,7 +410,7 @@ toppSave <- function (toppData,
       }
 
       utils::write.table(toppData,
-                  file = this_file,
+                  file = file.path(save_dir, this_file),
                   sep = "\t",
                   quote = FALSE,
                   row.names = FALSE,

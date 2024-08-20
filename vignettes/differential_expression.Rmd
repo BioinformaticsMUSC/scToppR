@@ -1,0 +1,112 @@
+---
+title: "differential_expression"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{differential_expression}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette shows the use of scToppR within a differential expression workflow. Using the IFNB (Kang 2018) dataset included in the SeuratData package, one can find differentially expressed genes between the "CTRL" and "STIM" groups using Seurat's FindMarkers function. The raw results from this analysis are included as a dataset in scToppR, which can be accessed as such:
+
+```{r setup}
+library(scToppR)
+library(dplyr)
+data("ifnb.de")
+head(ifnb.de)
+```
+
+As this is the raw data, we will begin by quickly filtering for significant results, using thresholds of 0.05 for the adjusted p value and 0.3 as the average log fold change.
+
+```{r filtering}
+ifnb.de.filtered <- ifnb.de |>
+  dplyr::filter(p_val_adj < 0.05, abs(avg_log2FC) > 0.3)
+```
+
+With these results, we will use scToppR to querry the ToppGene database for all categories for each cluster using the toppFun() function. This function requires users to specify the columns in their dataset.
+
+```{r toppFun}
+toppData <- toppFun(ifnb.de.filtered,
+                    gene_col = "gene",
+                    cluster_col = "celltype",
+                    p_val_col = "p_val_adj",
+                    logFC_col = "avg_log2FC")
+head(toppData)
+```
+
+The toppData dataframe includes all results from toppGene. We can use this dataframe to quickly generate pathway analysis plots using the toppPlot() function. The function can be used to generate a single plot, for example:
+
+```{r plot1, fig.dim=c(8,8)}
+toppPlot(toppData, 
+         category = "GeneOntologyMolecularFunction", 
+         clusters = "CD8 T")
+```
+
+The toppPlot() function can also create a plot for each cluster for a specified category; simply assign the parameter `clusters` to NULL. In this case, the function will return a list of plots.
+
+```{r plot_list, fig.dim=c(8,8)}
+plot_list <- toppPlot(toppData, 
+         category = "GeneOntologyMolecularFunction", 
+         clusters = NULL)
+plot_list[1]
+```
+
+
+All of these plots can also be automatically saved by the toppPlot() function. The files and their save locations can be set using the parameters:
+-save = TRUE
+-save_dir="/path/to/save_directory"
+-file_name_prefix="GO_Molecular_Function"
+
+The cluster/celltype name will be automatically added to the filename prior to saving.
+
+```{r plot_save, eval=FALSE}
+plot_list <- toppPlot(toppData, 
+         category = "GeneOntologyMolecularFunction", 
+         clusters = NULL,
+         save = TRUE,
+         save_dir = "./GO_results",
+         file_prefix = "GO_molecular_function")
+```
+
+scToppR also uses the toppBalloon() function to create a balloon plot, allowing researchers to quickly compare the top terms from the ToppGene results.
+
+```{r plot_balloon, fig.dim=c(8,5)}
+toppBalloon(toppData,
+            categories = "GeneOntologyBiologicalProcess")
+```
+
+Some advantages of using scToppR in a pipeline include access to the other categories in ToppGene. Users can quickly view results from all ToppGene categories using these plotting function, or by examining the toppData results. For example, a user could explore any common results among celltypes in terms such as Pathway, ToppCell, and TFBS.
+
+For example, a quick look at the toppBalloon plot for Pathway shows a distinction with the Dendritic Cells compared to others:
+
+```{r plot_balloon2, fig.dim=c(8,5)}
+toppBalloon(toppData,
+            categories = "Pathway")
+```
+
+The Pubmed category also provides researchers with other papers exploring similar data:
+
+```{r plot_balloon3, fig.dim=c(8,5)}
+toppBalloon(toppData,
+            categories = "Pubmed")
+```
+
+To save toppData results, scToppR also includes a toppSave() function. This function can save the toppData results as a single file, or it can split the data into different clusters/celltypes and save each individually. To do so, set `save = TRUE` in the function call. The function saves the files as Excel spreadsheets by default, but this can be changed to .csv or .tsv files using the `format` parameter.
+
+```{r save, eval=FALSE}
+
+toppSave(toppData,
+         filename = "IFNB_toppData",
+         save_dir = "./toppData_results"
+         split = TRUE,
+         format = "xlsx")
+
+```
+

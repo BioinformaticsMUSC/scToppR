@@ -43,3 +43,23 @@
 #' @source \url{https://toppgene.cchmc.org}
 #'
 "toppData"
+#' IFNB DE results
+#'
+#' A dataframe of differentially expressed genes generated using the
+#' FindMarkers function for each cluster from the Kang 2018 IFNB dataset
+#' Created using the IFNB dataset from the SeuratData package
+#'
+#' @format A dataframe with 92,860 rows and 7 columns
+#' \describe{
+#'   \item{p_val}{P values}
+#'   \item{avg_log2FC}{avg log 2 fc values}
+#'   \item{pct.1}{percentage of cells expressing gene in group 1}
+#'   \item{pct.2}{percentage of cells expressing gene in group 2}
+#'   \item{p_val_adj}{adjusted p-value (FDR)}
+#'   \item{cluster}{cell group name}
+#'   \item{gene}{gene name}
+#' }
+#' @usage data("ifnb.de")
+#' @source \url{https://www.nature.com/articles/nbt.4042}
+#'
+"ifnb.de"

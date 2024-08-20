@@ -11,7 +11,7 @@
 #' @param save_dir Directory to save file
 #' @param width width of the saved file (inches)
 #' @param height height of the saved file (inches)
-#' @param filename file name if saving the plot
+#' @param file_prefix file prefix if saving the plot - the cluster name is also added automatically
 #' @param combine If TRUE and multiple clusters selected, return a patchwork object of all plots; if FALSE return list of plots
 #' @param ncols If patchwork element returned, number of columns for subplots
 #' @param y_axis_text_size Size of the Y axis text - for certain categories, it's helpful to decrease this
@@ -29,7 +29,7 @@
 #'     category="GeneOntologyMolecularFunction",
 #'     clusters=0,
 #'     save=TRUE,
-#'     filename="MF_cluster0")
+#'     file_prefix="MF_cluster0")
 #'
 #' @export
 toppPlot <- function (toppData,
@@ -42,7 +42,7 @@ toppPlot <- function (toppData,
                       save_dir = NULL,
                       width = 5,
                       height = 6,
-                      filename = NULL,
+                      file_prefix = NULL,
                       y_axis_text_size=8,
                       combine = FALSE,
                       ncols = NULL) {
@@ -141,10 +141,10 @@ toppPlot <- function (toppData,
           ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
 
         if (isTRUE(save)) {
-          if (is.null(filename)) {
+          if (is.null(file_prefix)) {
             save_filename = stringr::str_glue("{category}_{c}_toppDotPlot.pdf")
           } else {
-            save_filename = stringr::str_glue("{filename}_{category}_{c}_toppDotPlot.pdf")
+            save_filename = stringr::str_glue("{file_prefix}_{c}.pdf")
           }
           ggplot2::ggsave(filename = file.path(output_dir, save_filename),
                           width = width, height=height)
@@ -186,10 +186,10 @@ toppPlot <- function (toppData,
         ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
 
       if (isTRUE(save)) {
-        if (is.null(filename)) {
+        if (is.null(file_prefix)) {
           save_filename = stringr::str_glue("{category}_{c}_toppDotPlot.pdf")
         } else {
-          save_filename = stringr::str_glue("{filename}_{category}_{c}_toppDotPlot.pdf")
+          save_filename = stringr::str_glue("{file_prefix}_{category}_{c}_toppDotPlot.pdf")
         }
         ggplot2::ggsave(filename = file.path(output_dir, save_filename),
                         width = width, height=height)

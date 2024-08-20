@@ -16,7 +16,7 @@ toppPlot(
   save_dir = NULL,
   width = 5,
   height = 6,
-  filename = NULL,
+  file_prefix = NULL,
   y_axis_text_size = 8,
   combine = FALSE,
   ncols = NULL
@@ -43,7 +43,7 @@ toppPlot(
 
 \item{height}{height of the saved file (inches)}
 
-\item{filename}{file name if saving the plot}
+\item{file_prefix}{file prefix if saving the plot - the cluster name is also added automatically}
 
 \item{y_axis_text_size}{Size of the Y axis text - for certain categories, it's helpful to decrease this}
 
@@ -64,6 +64,6 @@ toppPlot(toppData,
     category="GeneOntologyMolecularFunction",
     clusters=0,
     save=TRUE,
-    filename="MF_cluster0")
+    file_prefix="MF_cluster0")
 
 }
