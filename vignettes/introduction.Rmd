@@ -82,7 +82,11 @@ This function also has a save parameter, which will automatically save plots, wh
 
 scToppR will also automatically save the results of the ToppGene query. By default it will save separate files for each cluster. To save as one large file, set the parameter `split = FALSE`. It will also save all files as Excel spreadsheets, but this can be changed using the `format` parameter--it must be one of `c("xlsx", "csv", "tsv")`.
 
-```{r}
+```{r save}
 toppSave(toppData, filename = "PBMC", split = TRUE, format = "xslx")
+```
+
+```{r sessionInfo}
+sessionInfo()
 ```
 

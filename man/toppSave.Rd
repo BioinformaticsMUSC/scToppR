@@ -17,6 +17,8 @@ toppSave(
 
 \item{filename}{filename prefix for each split file}
 
+\item{save_dir}{the directory to save files}
+
 \item{split}{Boolean, whether to split the dataframe by celltype/cluster}
 
 \item{format}{Saved file format, one of c("xlsx", "csv", "tsv")}

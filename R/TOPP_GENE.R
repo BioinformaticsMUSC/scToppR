@@ -299,6 +299,7 @@ get_ToppCats <- function() {
 #'
 #' @param toppData Results from toppFun as a dataframe
 #' @param filename filename prefix for each split file
+#' @param save_dir the directory to save files
 #' @param split Boolean, whether to split the dataframe by celltype/cluster
 #' @param format Saved file format, one of c("xlsx", "csv", "tsv")
 #' @returns A saved file

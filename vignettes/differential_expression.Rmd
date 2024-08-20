@@ -110,3 +110,7 @@ toppSave(toppData,
 
 ```
 
+
+```{r sessionInfo}
+sessionInfo()
+```
