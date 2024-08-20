@@ -97,3 +97,6 @@ Disease
 ```
 
 To capture these in R, run the command `get_ToppCats()`.
+
+## License
+While scToppR is shared with a MIT License, please understand the Terms of Use set by ToppGene, which can be found [here.](https://toppgene.cchmc.org/navigation/termsofuse.jsp) Additionally, if data from ToppGene are used, please see the ToppGene citation notes [here.](https://toppgene.cchmc.org/help/publications.jsp)
