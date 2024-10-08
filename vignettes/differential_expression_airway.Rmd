@@ -1,8 +1,8 @@
 ---
-title: "differential_expression"
+title: "scToppR with differential expression, Airway dataset"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{differential_expression}
+  %\VignetteIndexEntry{differential_expression_airway}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,39 +14,60 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows the use of scToppR within a differential expression workflow. Using the IFNB (Kang 2018) dataset included in the SeuratData package, one can find differentially expressed genes between the "CTRL" and "STIM" groups using Seurat's FindMarkers function. The raw results from this analysis are included as a dataset in scToppR, which can be accessed as such:
+
+scToppR is a package that allows seamless, workflow-based interaction with ToppGene, a portal for gene enrichment analysis. Researchers can use scToppR to directly query ToppGene's databases and conduct analysis with a few lines of code. The use of data from ToppGene is governed by their Terms of Use:
+https://toppgene.cchmc.org/navigation/termsofuse.jsp
+
+This vignette shows the use of scToppR within a differential expression workflow. Using the 'airway' dataset, we'll perform a quick differential expression analysis using DESeq2. With the list of differentially expressed genes, we can easily use scToppR.
 
 ```{r setup}
-library(scToppR)
-library(dplyr)
-data("ifnb.de")
-head(ifnb.de)
-```
+#library(scToppR)
+devtools::load_all("~/biocm/packages/scToppR/")
 
-As this is the raw data, we will begin by quickly filtering for significant results, using thresholds of 0.05 for the adjusted p value and 0.3 as the average log fold change.
+suppressMessages({
+  library(airway)
+  library(DESeq2)
+})
+data("airway")
 
-```{r filtering}
-ifnb.de.filtered <- ifnb.de |>
-  dplyr::filter(p_val_adj < 0.05, abs(avg_log2FC) > 0.3)
+se <- airway
+rownames(se) <- rowData(se)$gene_name
+
+dds <- DESeqDataSet(se, design = ~ cell + dex)
+
+smallestGroupSize <- 3
+keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+dds <- dds[keep,]
+
+dds <- DESeq(dds)
+res <- results(dds)
+
+#add the gene names as a column in the results
+res$gene <- rownames(res)
+
+#add cluster column - here, with this bulk RNAseq data, we will only have 1 cluster
+res$cluster <- "cluster0"
 ```
 
 With these results, we will use scToppR to querry the ToppGene database for all categories for each cluster using the toppFun() function. This function requires users to specify the columns in their dataset.
 
 ```{r toppFun}
-toppData <- toppFun(ifnb.de.filtered,
+toppData <- toppFun(res,
                     gene_col = "gene",
-                    cluster_col = "celltype",
-                    p_val_col = "p_val_adj",
-                    logFC_col = "avg_log2FC")
+                    cluster_col = "cluster",
+                    p_val_col = "padj",
+                    logFC_col = "log2FoldChange")
 head(toppData)
 ```
+
+As the code reminds you, the use of this data must be done so in accordance with ToppGene's Terms of Use. For more information, please visit: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 
 The toppData dataframe includes all results from toppGene. We can use this dataframe to quickly generate pathway analysis plots using the toppPlot() function. The function can be used to generate a single plot, for example:
 
 ```{r plot1, fig.dim=c(8,8)}
 toppPlot(toppData, 
          category = "GeneOntologyMolecularFunction", 
-         clusters = "CD8 T")
+         clusters = "cluster0")
 ```
 
 The toppPlot() function can also create a plot for each cluster for a specified category; simply assign the parameter `clusters` to NULL. In this case, the function will return a list of plots.
@@ -103,7 +124,7 @@ To save toppData results, scToppR also includes a toppSave() function. This func
 ```{r save, eval=FALSE}
 
 toppSave(toppData,
-         filename = "IFNB_toppData",
+         filename = "airway_toppData",
          save_dir = "./toppData_results"
          split = TRUE,
          format = "xlsx")

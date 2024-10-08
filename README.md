@@ -2,7 +2,9 @@
 
 An API wrapper for [ToppGene](https://toppgene.cchmc.org/)
 
-Currently, this package utilizes the ToppFun portion of the site. Lists of marker genes can be submitted to create a dataframe of results.
+scToppR is a package that allows seamless, workflow-based interaction with ToppGene, a portal for gene enrichment analysis. Researchers can use scToppR to directly query ToppGene's databases and conduct analysis with a few lines of code. 
+
+Please note: The use of any data from ToppGene is governed by their [Terms of Use](https://toppgene.cchmc.org/navigation/termsofuse.jsp).
 
 ## Installation
 
@@ -21,16 +23,15 @@ To query ToppGene and create a dataframe of results, use the function `toppFun`.
 
 Input data: the input for `toppData` is a dataframe similar to FindAllMarkers (Seurat) or Wilcoxauc (Presto) outputs. The dataframe needs columns to determine genes, groups of cells (e.g., clusters or celltypes), average log fold changes, and p-values. 
 
-The package includes example data in the FindAllMarkers format, using the PBMC 3K dataset from the Seurat guided clustering tutorial.
+The package includes example data in the FindAllMarkers format, using the IFNB dataset (Kang 2018) from the SeuratData package.
 
 ```         
-data(pbmc.markers)
-toppData <- toppFun(pbmc.markers, 
-                    topp_categories = NULL,
-                    cluster_col = "cluster",
-                    gene_col = "gene"
-
-            )
+data("ifnb.de")
+toppData <- toppFun(ifnb.de.filtered,
+                    gene_col = "gene",
+                    cluster_col = "celltype",
+                    p_val_col = "p_val_adj",
+                    logFC_col = "avg_log2FC")
 ```
 
 This results in a dataframe like the following (only showing the top 5 rows): 
@@ -50,7 +51,9 @@ Once a toppData dataframe is created, it can be used to create a dotplot or ball
 Example code for dotplot
 
 ```         
-toppPlot(toppData, category = "ToppCell", clusters = "1", save = TRUE, num_terms = 10)
+toppPlot(toppData, 
+         category = "GeneOntologyMolecularFunction", 
+         clusters = "CD8 T")
 ```
 
 ![DotPlot of toppData results](/examples/toppplot_example.png)
@@ -63,10 +66,7 @@ Example code for balloon plot
 
 ```
 toppBalloon(toppData,
-            categories = c("GeneOntologyMolecularFunction"),
-            balloons = 2,
-            height = 6, 
-            width=15)
+            categories = "Pathway")
 ```
 
 ![Balloon plot of toppData results](/examples/balloon_example.png)
@@ -97,6 +97,8 @@ Disease
 ```
 
 To capture these in R, run the command `get_ToppCats()`.
+
+For more information, please see the vignettes.
 
 ## License
 While scToppR is shared with a MIT License, please understand the Terms of Use set by ToppGene, which can be found [here.](https://toppgene.cchmc.org/navigation/termsofuse.jsp) Additionally, if data from ToppGene are used, please see the ToppGene citation notes [here.](https://toppgene.cchmc.org/help/publications.jsp)

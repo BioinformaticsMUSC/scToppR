@@ -25,7 +25,8 @@ pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE)
 ```
 Alternatively, this markers table is included in the scToppR package:
 ```{r setup}
-library(scToppR)
+#library(scToppR)
+devtools::load_all("~/biocm/packages/scToppR")
 data("pbmc.markers")
 head(pbmc.markers)
 ```

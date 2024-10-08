@@ -20,10 +20,10 @@
 #' @importFrom dplyr filter arrange select
 #' @return data.frame
 #' @examples
-#' data("pbmc.markers")
-#' toppData <- toppFun(pbmc.markers,
+#' data("ifnb.de")
+#' toppData <- toppFun(ifnb.de,
 #'     topp_categories = NULL,
-#'     cluster_col = "cluster",
+#'     cluster_col = "celltype",
 #'     gene_col = "gene",
 #'     p_val_col = "p_val_adj",
 #'     logFC_col = "avg_log2FC")
@@ -45,6 +45,15 @@ toppFun <- function(markers,
                     max_genes=1500,
                     max_results=50
                     ) {
+
+  #Print message about the use of ToppGene's data and adhering to their terms of use
+  msg <- "This function returns data generated from ToppGene (https://toppgene.cchmc.org/)\n
+Any use of this data must be done so under the Terms of Use and citation guide established by ToppGene.\n
+Terms of Use: https://toppgene.cchmc.org/navigation/termsofuse.jsp
+Citations: https://toppgene.cchmc.org/help/publications.jsp"
+  message(msg)
+
+  markers <- as.data.frame(markers)
 
   #subset clusters if needed
   if (!(is.null(clusters))) {

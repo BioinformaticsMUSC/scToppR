@@ -63,10 +63,10 @@ data.frame
 Get results from ToppFun
 }
 \examples{
-data("pbmc.markers")
-toppData <- toppFun(pbmc.markers,
+data("ifnb.de")
+toppData <- toppFun(ifnb.de,
     topp_categories = NULL,
-    cluster_col = "cluster",
+    cluster_col = "celltype",
     gene_col = "gene",
     p_val_col = "p_val_adj",
     logFC_col = "avg_log2FC")

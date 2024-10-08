@@ -242,8 +242,9 @@ toppBalloon <- function (toppData,
     balloon_list[[cat]] <- toppData |>
       dplyr::filter(Category == cat) |>
       dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
+      dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
       dplyr::group_by(Cluster) |>
-      dplyr::slice_max(order_by=nlog10_fdr, n=balloons, with_ties = FALSE) |>
+      dplyr::slice_max(order_by=geneRatio, n=balloons, with_ties = FALSE) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
       ggplot(aes(
         x=forcats::fct_reorder(Name, Cluster),
