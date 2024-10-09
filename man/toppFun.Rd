@@ -60,7 +60,11 @@ toppFun(
 data.frame
 }
 \description{
-Get results from ToppFun
+The toppFun() function takes a data.frame or other tabular data structure and selects genes to use in querying
+ToppGene.
+}
+\details{
+The use of data from ToppGene is governed by their Terms of Use: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 }
 \examples{
 data("ifnb.de")

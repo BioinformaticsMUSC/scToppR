@@ -1,5 +1,11 @@
 #' Get results from ToppFun
 #'
+#' @description
+#' The toppFun() function takes a data.frame or other tabular data structure and selects genes to use in querying
+#' ToppGene.
+#'
+#' @details The use of data from ToppGene is governed by their Terms of Use: https://toppgene.cchmc.org/navigation/termsofuse.jsp
+#'
 #' @param markers A vector of markers or dataframe with columns as cluster labels
 #' @param topp_categories A string or vector with specific toppfun categories for the query
 #' @param cluster_col Column name for the groups of cells (e.g. cluster or celltype)
