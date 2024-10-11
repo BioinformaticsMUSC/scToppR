@@ -22,8 +22,7 @@ This vignette shows the use of scToppR within a differential expression workflow
 The raw results from this analysis are included as a dataset in scToppR, which can be accessed as such:
 
 ```{r setup}
-#library(scToppR)
-devtools::load_all("~/biocm/packages/scToppR/")
+library(scToppR)
 library(dplyr)
 data("ifnb.de")
 head(ifnb.de)
