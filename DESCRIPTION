@@ -23,6 +23,7 @@ Depends:
     R (>= 4.3.0)
 LazyData: false
 Suggests: 
+    airway,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
