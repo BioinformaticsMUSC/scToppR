@@ -24,6 +24,7 @@ Depends:
 LazyData: false
 Suggests: 
     airway,
+    DESeq2,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
