@@ -8,8 +8,16 @@ Please note: The use of any data from ToppGene is governed by their [Terms of Us
 
 ## Installation
 
-This package can be installed from the Github repository:
+This package can be installed from Bioonductor:
+```
+if (!requireNamespace('BiocManager', quietly = TRUE))
+install.packages('BiocManager')
 
+BiocManager::install('scToppR')
+library(scToppR)
+```
+
+Additionally, the latest development version can be installed via GitHub:
 ```         
 if(!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
