@@ -35,6 +35,7 @@
 #'     logFC_col = "avg_log2FC")
 #' @export
 toppFun <- function(markers,
+                    type = "degs",
                     topp_categories = NULL,
                     cluster_col = "cluster",
                     gene_col = "gene",
@@ -67,26 +68,33 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
       dplyr::filter(!!as.name(cluster_col) %in% clusters)
   }
 
-  if (!(cluster_col %in% colnames(markers))) {
-    stop(paste0("Cluster column `", cluster_col, "` not found in data. Please specify."))
-  }
-  #parse fc_filter
-  if (!(fc_filter %in% c("ALL", "UPREG", "DOWNREG"))){
-    stop("please select one of c('ALL', 'UPREG', 'DOWNREG') for fc_filter")
+  if (type == "degs") {
+    if (!(cluster_col %in% colnames(markers))) {
+      stop(paste0("Cluster column `", cluster_col, "` not found in data. Please specify."))
+    }
+    #parse fc_filter
+    if (!(fc_filter %in% c("ALL", "UPREG", "DOWNREG"))){
+      stop("please select one of c('ALL', 'UPREG', 'DOWNREG') for fc_filter")
+    }
   }
 
   #parse input
   if ('data.frame' %in% class(markers)) {
-    marker_list <- process_markers(markers=markers,
-                                    cluster_col=cluster_col,
-                                    gene_col=gene_col,
-                                    p_val_col = p_val_col,
-                                   logFC_col = logFC_col,
-                                    num_genes=num_genes,
-                                    pval_cutoff=pval_cutoff,
-                                   fc_cutoff = fc_cutoff,
-                                   genes_submit_cutoff=genes_submit_cutoff,
-                                    fc_filter=fc_filter)
+    if (type == "degs") {
+      marker_list <- process_markers(markers=markers,
+                                     cluster_col=cluster_col,
+                                     gene_col=gene_col,
+                                     p_val_col = p_val_col,
+                                     logFC_col = logFC_col,
+                                     num_genes=num_genes,
+                                     pval_cutoff=pval_cutoff,
+                                     fc_cutoff = fc_cutoff,
+                                     genes_submit_cutoff=genes_submit_cutoff,
+                                     fc_filter=fc_filter)
+    } else {
+      marker_list = markers
+    }
+
   } else {
     stop("data format not recognized")
   }
