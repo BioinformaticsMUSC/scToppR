@@ -6,7 +6,13 @@
 #'
 #' @details The use of data from ToppGene is governed by their Terms of Use: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 #'
-#' @param markers A vector of markers or dataframe with columns as cluster labels
+#' @param input_data A vector of markers or dataframe with columns as cluster labels
+#' @param type One of c("degs", "marker_list", or "marker_df). If "degs" is selected,
+#' the input_data is assumed to be a data.frame with logfoldchange, pvalue, and gene name columns.
+#' If "marker_list" is selected, input_data is assumed to be a list of genes with no other stats,
+#' and any thresholds pertaining to "degs" will be ignored.
+#' If "marker_df" is selected, the input_data is assumed to be a data.frame with columns as clusters/celltypes,
+#' and entries are lists of markers.
 #' @param topp_categories A string or vector with specific toppfun categories for the query
 #' @param cluster_col Column name for the groups of cells (e.g. cluster or celltype)
 #' @param gene_col Column name for genes (e.g. gene or feature)
@@ -22,8 +28,10 @@
 #' @param max_genes Maximum number of genes to match in a query
 #' @param max_results Maximum number of results per cluster
 #' @param correction P-value correction method ("FDR" is "BH")
+#' @param verbose Verbosity setting, TRUE or FALSE
 #' @importFrom stringr str_glue str_c str_subset
 #' @importFrom dplyr filter arrange select
+#' @importFrom httr2 request req_body_json req_perform resp_body_json
 #' @return data.frame
 #' @examples
 #' data("ifnb.de")
@@ -34,7 +42,7 @@
 #'     p_val_col = "p_val_adj",
 #'     logFC_col = "avg_log2FC")
 #' @export
-toppFun <- function(markers,
+toppFun <- function(input_data,
                     type = "degs",
                     topp_categories = NULL,
                     cluster_col = "cluster",
@@ -46,11 +54,12 @@ toppFun <- function(markers,
                     fc_cutoff = 0,
                     fc_filter = "ALL",
                     clusters = NULL,
-                    correction="FDR",
+                    correction ="FDR",
                     key_type = "SYMBOL",
-                    min_genes=2,
-                    max_genes=1500,
-                    max_results=50
+                    min_genes = 2,
+                    max_genes = 1500,
+                    max_results = 50,
+                    verbose = TRUE
                     ) {
 
   #Print message about the use of ToppGene's data and adhering to their terms of use
@@ -60,43 +69,36 @@ Terms of Use: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 Citations: https://toppgene.cchmc.org/help/publications.jsp"
   message(msg)
 
-  markers <- as.data.frame(markers)
-
-  #subset clusters if needed
-  if (!(is.null(clusters))) {
-    markers <- markers |>
-      dplyr::filter(!!as.name(cluster_col) %in% clusters)
-  }
-
+  #parse for degs vs markers
   if (type == "degs") {
-    if (!(cluster_col %in% colnames(markers))) {
+    input_data <- as.data.frame(input_data)
+
+    #subset clusters if needed
+    if (!(is.null(clusters))) {
+      input_data <- input_data |>
+        dplyr::filter(!!as.name(cluster_col) %in% clusters)
+    }
+    if (!(cluster_col %in% colnames(input_data))) {
       stop(paste0("Cluster column `", cluster_col, "` not found in data. Please specify."))
     }
     #parse fc_filter
     if (!(fc_filter %in% c("ALL", "UPREG", "DOWNREG"))){
       stop("please select one of c('ALL', 'UPREG', 'DOWNREG') for fc_filter")
     }
-  }
-
-  #parse input
-  if ('data.frame' %in% class(markers)) {
-    if (type == "degs") {
-      marker_list <- process_markers(markers=markers,
-                                     cluster_col=cluster_col,
-                                     gene_col=gene_col,
-                                     p_val_col = p_val_col,
-                                     logFC_col = logFC_col,
-                                     num_genes=num_genes,
-                                     pval_cutoff=pval_cutoff,
-                                     fc_cutoff = fc_cutoff,
-                                     genes_submit_cutoff=genes_submit_cutoff,
-                                     fc_filter=fc_filter)
-    } else {
-      marker_list = markers
-    }
-
-  } else {
-    stop("data format not recognized")
+    gene_data <- process_markers(markers=input_data,
+                                   cluster_col=cluster_col,
+                                   gene_col=gene_col,
+                                   p_val_col = p_val_col,
+                                   logFC_col = logFC_col,
+                                   num_genes=num_genes,
+                                   pval_cutoff=pval_cutoff,
+                                   fc_cutoff = fc_cutoff,
+                                   genes_submit_cutoff=genes_submit_cutoff,
+                                   fc_filter=fc_filter)
+  } else if (type == "marker_list") {
+    gene_data = data.frame(genes=input_data)
+  } else if (type == "marker_df") {
+    gene_data = input_data
   }
 
   #parse correction method
@@ -112,13 +114,16 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
   big_df <- data.frame()
   missing_clusters = c()
 
-  for (col in names(marker_list)) {
+  for (col in names(gene_data)) {
 
     if (!(col %in% c('rank', 'X'))) {
-      gene_list = marker_list[[col]]
+      gene_list = gene_data[[col]]
 
       if (sum(!(is.na(gene_list))) >= min_genes) {
-        cat('Working on cluster:', col, '\n')
+        if (verbose) {
+          cat('Working on cluster:', col, '\n')
+        }
+
         d <- get_topp(gene_list = gene_list,
                       topp_categories = topp_categories,
                       key_type = "SYMBOL",
@@ -130,7 +135,7 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
 
         if (nrow(d) == 0){
           missing_clusters = append(missing_clusters, col)
-        } else if (length(names(markers)) == 1) {
+        } else if (length(names(gene_data)) == 1) {
           big_df <- rbind(big_df, d)
         } else {
           d[['Cluster']] = col
@@ -141,8 +146,6 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
       }
     }
   }
-  #print(big_df)
-
   #report any missing clusters
   if (length(missing_clusters) > 0) {
     write(stringr::str_glue("WARNING: no results found for clusters {stringr::str_c(missing_clusters, collapse=', ')}"),
@@ -155,21 +158,24 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
 #'
 #' @param genes A list of genes
 #' @return a vector of genes in Entrez format
-#' @importFrom rjson toJSON
-#' @importFrom httr POST content
+#' @importFrom httr2 request req_body_json req_perform
 #' @examples
 #' get_Entrez(genes=c("IFNG", "FOXP3"))
 #' @export
 get_Entrez<- function(genes){
   lookup_url = 'https://toppgene.cchmc.org/API/lookup'
-  payload = rjson::toJSON(list(Symbols=genes))
-  if(length(genes) == 1){
-    payload = paste0("{\"Symbols\":[\"", genes,"\"]}")
+  req <- httr2::request(lookup_url)
+  if (length(genes) == 1) {
+    resp <- req |>
+      httr2::req_body_json(list(Symbols=list(genes))) |>
+      httr2::req_perform()
+  } else {
+    resp <- req |>
+      httr2::req_body_json(list(Symbols=genes)) |>
+      httr2::req_perform()
   }
-  r <- httr::POST(url = lookup_url,
-                  body = payload)
   new_gene_list <- c()
-  for (g in httr::content(r)$Genes) {
+  for (g in httr2::resp_body_json(resp)$Genes) {
     new_gene_list <- base::append(new_gene_list, g[['Entrez']])
   }
   return (new_gene_list)
@@ -184,7 +190,7 @@ process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_co
                              genes_submit_cutoff=1000) {
 
 
-  #parse columns - tries to find columns if differ from the default
+  #parse columns - tries to find columns if differ from the default TODO
 
   #Make a list of lists - each sub list has all of the genes (up to num_genes if specified) of the filtered data
   marker_list = list()
@@ -209,15 +215,6 @@ process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_co
         dplyr::arrange(!!as.name(logFC_col)) |>
         dplyr::select(!!as.name(gene_col))
     }
-    # if (!(is.null(num_genes))) {
-    #   if (length(all_cl_markers[[gene_col]]) > num_genes) {
-    #     marker_list[[paste0("c",cl)]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
-    #   } else {
-    #     marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
-    #   }
-    # } else {
-    #   marker_list[[paste0("c",cl)]] <- all_cl_markers[[gene_col]] |> unlist() |> as.character()
-    # }
     if (!(is.null(num_genes))) {
       if (length(all_cl_markers[[gene_col]]) > num_genes) {
         marker_list[[cl]] <- all_cl_markers[1:num_genes, gene_col] |> unlist() |> as.character()
@@ -263,29 +260,21 @@ get_topp <- function(gene_list,
     category_list[[i]] <- cat_dict
   }
 
-  payload[['Categories']] = category_list
-
-  data = rjson::toJSON(payload)
-  if(length(new_gene_list) == 1) {  ####
-    data = paste0("{\"Genes\":[", new_gene_list,"],\"Categories\":", rjson::toJSON( payload[['Categories']]), "}") ####
-  }
   #send POST request
   url = 'https://toppgene.cchmc.org/API/enrich'
-  r <- httr::POST(url = url,
-            body=data)
+  req <- request(url)
+  resp <- req |>
+    httr2::req_body_json(list(Genes=new_gene_list, Categories=category_list)) |>
+    httr2::req_perform()
 
-  response_data <- httr::content(r)[['Annotations']]
-  return_df <- NULL
+  response_data <- httr2::resp_body_json(resp)[['Annotations']]
   keepers <- c("Category","ID","Name","PValue","QValueFDRBH","QValueFDRBY","QValueBonferroni",
                "TotalGenes","GenesInTerm","GenesInQuery","GenesInTermInQuery","Source","URL")
+  results_df <- data.frame()
   for (i in 1:length(response_data)) {
-    if (is.null(return_df)) {
-      return_df <- data.frame(response_data[[i]][keepers])
-    } else {
-      return_df <- rbind(return_df,response_data[[i]][keepers])
-    }
+    results_df <- rbind(results_df,response_data[[i]][keepers])
   }
-  return (return_df)
+  return (results_df)
 }
 
 

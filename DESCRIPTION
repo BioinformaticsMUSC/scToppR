@@ -7,7 +7,7 @@ Description: scToppR provides an easy-to-use API wrapper for the ToppGene web pl
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports: 
     dplyr,
     forcats,
@@ -26,8 +26,10 @@ Suggests:
     airway,
     DESeq2,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 biocViews: Pathways, SingleCell
 BugReports: https://github.com/BioinformaticsMUSC/scToppR
 URL: https://github.com/BioinformaticsMUSC/scToppR
+Config/testthat/edition: 3

@@ -63,3 +63,47 @@
 #' @source \url{https://www.nature.com/articles/nbt.4042}
 #'
 "ifnb.de"
+
+#' IFNB Marker DF
+#'
+#' A dataframe of 100 top markers for each class in 'seurat_annotations' column
+#' using presto::wilcoxauc() and presto::top_markers()
+#' Created using the IFNB dataset from the SeuratData package
+#'
+#' @format A dataframe with 100 rows and 14 columns
+#' \describe{
+#'   \item{rank}{rank of marker}
+#'   \item{B}{cell group name}
+#'   \item{B Activated}{cell group name}
+#'   \item{CD14 Mono}{cell group name}
+#'   \item{CD16 Mono}{cell group name}
+#'   \item{CD4 Memory T}{cell group name}
+#'   \item{CD4 Naive T}{cell group name}
+#'   \item{CD8 T}{cell group name}
+#'   \item{DC}{cell group name}
+#'   \item{Eryth}{cell group name}
+#'   \item{Mk}{cell group name}
+#'   \item{CNK}{cell group name}
+#'   \item{pDC}{cell group name}
+#'   \item{T activated}{cell group name}
+#' }
+#' @usage data("ifnb.markers.df")
+#' @source \url{https://www.nature.com/articles/nbt.4042}
+#'
+"ifnb.markers.df"
+
+#' IFNB Marker DF
+#'
+#' A list of the 100 top markers for CD8 T cells in ifnb dataset
+#' using presto::wilcoxauc() and presto::top_markers()
+#' Created using the IFNB dataset from the SeuratData package
+#'
+#' @format A character vector with 100 genes
+#' \describe{
+#'   \item{ifnb.markers.list.CD8T}{rank of marker}
+#' }
+#' @usage data("ifnb.markers.list.CD8T")
+#' @source \url{https://www.nature.com/articles/nbt.4042}
+#'
+"ifnb.markers.list.CD8T"
+
