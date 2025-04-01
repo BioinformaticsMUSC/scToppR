@@ -30,15 +30,15 @@ library(scToppR)
 To query ToppGene and create a dataframe of results, use the function `toppFun`. The function takes as inputs a list or table of top markers (with clusters/cell types as columns) and a list of any ToppGene categories (e.g. "GeneOntologyMolecularFunction" and/or "ToppGene")
 
 Input data: scToppR can handle 3 different types of inputs, please use the `type` parameter to select the correct format.
--`degs`:a dataframe containing differential expression results similar to FindAllMarkers (Seurat) or DESeq2 outputs. The dataframe needs columns to determine genes, groups of cells (e.g., clusters or celltypes, if applicable), average log fold changes, and p-values. If use bulk RNAseq data, please create a dummy cluster column (e.g. df$cluster = "bulk").
--`marker_df`: a dataframe with celltypes/cluster names as column names and marker genes for each as values. See `data("ifnb.markers.df")` as an example.
--`marker_list`: a vector of genes
+- `degs`:a dataframe containing differential expression results similar to FindAllMarkers (Seurat) or DESeq2 outputs. The dataframe needs columns to determine genes, groups of cells (e.g., clusters or celltypes, if applicable), average log fold changes, and p-values. If use bulk RNAseq data, please create a dummy cluster column (e.g. df$cluster = "bulk").
+- `marker_df`: a dataframe with celltypes/cluster names as column names and marker genes for each as values. See `data("ifnb.markers.df")` as an example.
+- `marker_list`: a vector of genes
 
 The package includes example data in all three formats, using the IFNB dataset (Kang 2018) from the SeuratData package.
 
 ```         
 data("ifnb.de")
-toppData <- toppFun(ifnb.de.filtered,
+toppData <- toppFun(ifnb.de,
                     gene_col = "gene",
                     cluster_col = "celltype",
                     p_val_col = "p_val_adj",
