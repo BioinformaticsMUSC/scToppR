@@ -122,13 +122,13 @@ toppPlot <- function (toppData,
           dplyr::filter(Cluster == c) |>
           dplyr::filter(Category == category) |>
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-          dplyr::mutate(Name = forcats::fct_reorder(Name, -!!as.name(p_val_display_column))) |>
+          #dplyr::mutate(Name = forcats::fct_reorder(Name, -!!as.name(p_val_display_column))) |>
           dplyr::arrange(-!!as.name(p_val_display_column)) |>
           utils::head(num_terms) |>
 
           ggplot2::ggplot(mapping = aes(
             x = geneRatio,
-            y = Name
+            y = forcats::fct_reorder(Name, geneRatio)
           )) +
           ggplot2::geom_segment(aes(xend=0, yend=Name)) +
           ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
