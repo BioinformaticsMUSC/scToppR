@@ -200,6 +200,37 @@ toppPlot <- function (toppData,
     # } else {
     #   return (category_plot_list)
     # }
+  } else if (is.null(clusters)) {
+    single_plot <- tmp_data |>
+      dplyr::filter(Category == category) |>
+      dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
+      #dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
+      dplyr::arrange(-!!as.name(p_val_display_column)) |>
+      utils::head(num_terms) |>
+
+      ggplot2::ggplot(mapping = aes(
+        x = geneRatio,
+        y = forcats::fct_reorder(Name, geneRatio)
+      )) +
+      ggplot2::geom_segment(aes(xend=0, yend=Name)) +
+      ggplot2::geom_point(mapping = aes(size=GenesInTermInQuery, color=!!as.name(p_val_display_column))) +
+      viridis::scale_color_viridis(option = "C")  +
+      ggplot2::theme_bw() +
+      ggplot2::ylab(category) +
+      ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
+      ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = FALSE)) +
+      ggplot2::labs(color=color_label, size = "Genes from Query\n in Gene Set")
+
+    if (isTRUE(save)) {
+      if (is.null(file_prefix)) {
+        save_filename = stringr::str_glue("{category}_toppDotPlot.pdf")
+      } else {
+        save_filename = stringr::str_glue("{file_prefix}_{category}_toppDotPlot.pdf")
+      }
+      ggplot2::ggsave(filename = file.path(output_dir, save_filename),
+                      width = width, height=height)
+    }
+    return (single_plot)
   }
 }
 
