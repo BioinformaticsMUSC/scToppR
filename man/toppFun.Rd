@@ -12,6 +12,7 @@ toppFun(
   gene_col = "gene",
   p_val_col = "adj_p_val_col",
   logFC_col = "avg_logFC",
+  direction_mode = "all",
   num_genes = 1000,
   pval_cutoff = 0.5,
   fc_cutoff = 0,
@@ -21,7 +22,8 @@ toppFun(
   key_type = "SYMBOL",
   min_genes = 2,
   max_genes = 1500,
-  max_results = 50
+  max_results = 50,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -44,6 +46,8 @@ and entries are lists of markers.}
 
 \item{logFC_col}{Column name for the avg log FC column}
 
+\item{direction_mode}{One of c("all", "split"). Whether to use all genes in the pathway analysis, or to split by up and down regulated genes}
+
 \item{num_genes}{Number of genes per group to use for toppGene query}
 
 \item{pval_cutoff}{(adjusted) P-value cutoff for filtering differentially expressed genes}
@@ -63,6 +67,8 @@ and entries are lists of markers.}
 \item{max_genes}{Maximum number of genes to match in a query}
 
 \item{max_results}{Maximum number of results per cluster}
+
+\item{verbose}{Verbosity setting, TRUE or FALSE}
 }
 \value{
 data.frame

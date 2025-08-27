@@ -18,6 +18,7 @@
 #' @param gene_col Column name for genes (e.g. gene or feature)
 #' @param logFC_col Column name for the avg log FC column
 #' @param p_val_col Column name for the p-value or adjusted p-value (preferred)
+#' @param direction_mode One of c("all", "split"). Whether to use all genes in the pathway analysis, or to split by up and down regulated genes
 #' @param num_genes Number of genes per group to use for toppGene query
 #' @param key_type Gene name format
 #' @param pval_cutoff (adjusted) P-value cutoff for filtering differentially expressed genes
@@ -49,6 +50,7 @@ toppFun <- function(input_data,
                     gene_col = "gene",
                     p_val_col = "adj_p_val_col",
                     logFC_col = "avg_logFC",
+                    direction_mode = "all",
                     num_genes = 1000,
                     pval_cutoff = 0.5,
                     fc_cutoff = 0,
@@ -62,6 +64,9 @@ toppFun <- function(input_data,
                     verbose = TRUE
                     ) {
 
+  if (!(type %in% c("degs", "marker_df", "marker_list"))) {
+    stop("Please ensure the parameter `type` is one of: degs, marker_df, or marker_list.")
+  }
   #Print message about the use of ToppGene's data and adhering to their terms of use
   msg <- "This function returns data generated from ToppGene (https://toppgene.cchmc.org/)\n
 Any use of this data must be done so under the Terms of Use and citation guide established by ToppGene.\n
@@ -85,7 +90,8 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
     if (!(fc_filter %in% c("ALL", "UPREG", "DOWNREG"))){
       stop("please select one of c('ALL', 'UPREG', 'DOWNREG') for fc_filter")
     }
-    gene_data <- process_markers(markers=input_data,
+    if (direction_mode == "all") {
+    gene_data <- process_degs(degs=input_data,
                                    cluster_col=cluster_col,
                                    gene_col=gene_col,
                                    p_val_col = p_val_col,
@@ -95,11 +101,40 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                                    fc_cutoff = fc_cutoff,
                                    genes_submit_cutoff=genes_submit_cutoff,
                                    fc_filter=fc_filter)
+    } else if (direction_mode == "split"){
+      gene_data_split = list()
+      print(input_data)
+      input_data_up <- input_data |> dplyr::filter(!!as.name(logFC_col) > fc_cutoff)
+      gene_data_split[['up']] <- process_degs(degs=input_data_up,
+                                              cluster_col=cluster_col,
+                                              gene_col=gene_col,
+                                              p_val_col = p_val_col,
+                                              logFC_col = logFC_col,
+                                              num_genes=num_genes,
+                                              pval_cutoff=pval_cutoff,
+                                              fc_cutoff = fc_cutoff,
+                                              genes_submit_cutoff=genes_submit_cutoff,
+                                              fc_filter=fc_filter)
+      input_data_down <- input_data |> dplyr::filter(abs(!!as.name(logFC_col)) > fc_cutoff & !!as.name(logFC_col) < 0)
+      gene_data_split[['down']] <- process_degs(degs=input_data_down,
+                                              cluster_col=cluster_col,
+                                              gene_col=gene_col,
+                                              p_val_col = p_val_col,
+                                              logFC_col = logFC_col,
+                                              num_genes=num_genes,
+                                              pval_cutoff=pval_cutoff,
+                                              fc_cutoff = fc_cutoff,
+                                              genes_submit_cutoff=genes_submit_cutoff,
+                                              fc_filter=fc_filter)
+
+
+    }
   } else if (type == "marker_list") {
     gene_data = data.frame(genes=input_data)
   } else if (type == "marker_df") {
     gene_data = input_data
   }
+
 
   #parse correction method
   if (!(correction %in% c("none", "FDR", "Bonferroni"))) {
@@ -114,35 +149,74 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
   big_df <- data.frame()
   missing_clusters = c()
 
-  for (col in names(gene_data)) {
+  if (direction_mode == "all") {
+    for (col in names(gene_data)) {
 
-    if (!(col %in% c('rank', 'X'))) {
-      gene_list = gene_data[[col]]
+      if (!(col %in% c('rank', 'X'))) {
+        gene_list = gene_data[[col]]
 
-      if (sum(!(is.na(gene_list))) >= min_genes) {
-        if (verbose) {
-          cat('Working on cluster:', col, '\n')
-        }
+        if (sum(!(is.na(gene_list))) >= min_genes) {
+          if (verbose) {
+            cat('Working on cluster:', col, '\n')
+          }
 
-        d <- get_topp(gene_list = gene_list,
-                      topp_categories = topp_categories,
-                      key_type = "SYMBOL",
-                      pval_cutoff=pval_cutoff,
-                      min_genes=min_genes,
-                      max_genes=max_genes,
-                      max_results=max_results,
-                      correction=correction)
+          d <- get_topp(gene_list = gene_list,
+                        topp_categories = topp_categories,
+                        key_type = "SYMBOL",
+                        pval_cutoff=pval_cutoff,
+                        min_genes=min_genes,
+                        max_genes=max_genes,
+                        max_results=max_results,
+                        correction=correction)
 
-        if (nrow(d) == 0){
-          missing_clusters = append(missing_clusters, col)
-        } else if (length(names(gene_data)) == 1) {
-          big_df <- rbind(big_df, d)
+          if (nrow(d) == 0){
+            missing_clusters = append(missing_clusters, col)
+          } else if (length(names(gene_data)) == 1) {
+            big_df <- rbind(big_df, d)
+          } else {
+            d[['Cluster']] = col
+            big_df <- rbind(big_df, d)
+          }
         } else {
-          d[['Cluster']] = col
-          big_df <- rbind(big_df, d)
+          missing_clusters = append(missing_clusters, col)
         }
-      } else {
-        missing_clusters = append(missing_clusters, col)
+      }
+    }
+  } else if (direction_mode == "split") {
+    for (fc_direction in names(gene_data_split)) {
+
+      for (col in names(gene_data_split[[fc_direction]])) {
+        col_dir = paste(col, fc_direction, sep="_")
+        if (!(col %in% c('rank', 'X'))) {
+          gene_list = gene_data_split[[fc_direction]][[col]]
+
+          if (sum(!(is.na(gene_list))) >= min_genes) {
+            if (verbose) {
+              cat('Working on cluster:', col, fc_direction, '\n')
+            }
+
+            d <- get_topp(gene_list = gene_list,
+                          topp_categories = topp_categories,
+                          key_type = "SYMBOL",
+                          pval_cutoff=pval_cutoff,
+                          min_genes=min_genes,
+                          max_genes=max_genes,
+                          max_results=max_results,
+                          correction=correction)
+
+            if (nrow(d) == 0){
+              missing_clusters = append(missing_clusters, col_dir)
+            } else if (length(names(gene_data_split[[fc_direction]])) == 1) {
+              big_df <- rbind(big_df, d)
+            } else {
+              d[['Cluster']] = col
+              d[['Direction']] = fc_direction
+              big_df <- rbind(big_df, d)
+            }
+          } else {
+            missing_clusters = append(missing_clusters, col_dir)
+          }
+        }
       }
     }
   }
@@ -182,7 +256,7 @@ get_Entrez<- function(genes){
 }
 
 ##### PROCESS MARKER INPUTS
-process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_col,
+process_degs <- function (degs, cluster_col, gene_col, p_val_col, logFC_col,
                              num_genes=1000,
                              pval_cutoff=0.5,
                              fc_cutoff=0,
@@ -195,14 +269,17 @@ process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_co
   #Make a list of lists - each sub list has all of the genes (up to num_genes if specified) of the filtered data
   marker_list = list()
 
-  for (cl in unique(markers[[cluster_col]])) {
-    all_cl_markers <- markers |>
+  for (cl in unique(degs[[cluster_col]])) {
+    all_cl_markers <- degs |>
       dplyr::filter(!!as.name(cluster_col) == cl) |>
       dplyr::filter(!!as.name(p_val_col) < pval_cutoff)
     if (fc_filter == "ALL"){
       all_cl_markers <- all_cl_markers |>
         dplyr::filter(abs(!!as.name(logFC_col)) > fc_cutoff) |>
         dplyr::arrange(-abs(!!as.name(logFC_col))) |>
+        # dplyr::mutate(direction = dplyr::case_when(!!as.name(logFC_col) > 0 ~ "up",
+        #                                            !!as.name(logFC_col) < 0 ~ "down",
+        #                                            .default = "nc")) |>
         dplyr::select(!!as.name(gene_col))
     } else if (fc_filter == "UPREG") {
       all_cl_markers <- all_cl_markers |>
@@ -211,7 +288,7 @@ process_markers <- function (markers, cluster_col, gene_col, p_val_col, logFC_co
         dplyr::select(!!as.name(gene_col))
     } else if (fc_filter == "DOWNREG") {
       all_cl_markers <- all_cl_markers |>
-        dplyr::filter(!!as.name(logFC_col) < fc_cutoff) |>
+        dplyr::filter(!!as.name(logFC_col) < fc_cutoff * -1) |>
         dplyr::arrange(!!as.name(logFC_col)) |>
         dplyr::select(!!as.name(gene_col))
     }
