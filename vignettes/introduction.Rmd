@@ -34,7 +34,8 @@ head(pbmc.markers)
 With this data we can run the function `toppFun` to get results from ToppGene.
 
 ```{r toppFun_1}
-toppData <- toppFun(markers = pbmc.markers,
+toppData <- toppFun(input_data = pbmc.markers,
+                    type = "degs",
                     topp_categories = NULL, 
                     cluster_col = "cluster", 
                     gene_col = "gene",

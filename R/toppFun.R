@@ -171,8 +171,6 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
 
           if (nrow(d) == 0){
             missing_clusters = append(missing_clusters, col)
-          } else if (length(names(gene_data)) == 1) {
-            big_df <- rbind(big_df, d)
           } else {
             d[['Cluster']] = col
             big_df <- rbind(big_df, d)
