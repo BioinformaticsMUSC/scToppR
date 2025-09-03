@@ -9,6 +9,7 @@ toppPlot(
   toppData,
   category,
   clusters = NULL,
+  cluster_col = "Cluster",
   num_terms = 10,
   p_val_adj = "BH",
   p_val_display = "log",
@@ -28,6 +29,8 @@ toppPlot(
 \item{category}{The topp categories to plot}
 
 \item{clusters}{The cluster(s) to plot}
+
+\item{cluster_col}{The column name for clusters (default: "Cluster")}
 
 \item{num_terms}{The number of terms from the toppData results to be plotted, per cluster}
 

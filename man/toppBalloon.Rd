@@ -9,6 +9,7 @@ toppBalloon(
   categories = NULL,
   balloons = 3,
   x_axis_text_size = 6,
+  cluster_col = "Cluster",
   filename = NULL,
   save = FALSE,
   height = 5,
@@ -23,6 +24,8 @@ toppBalloon(
 \item{balloons}{Number of balloons per group to plot}
 
 \item{x_axis_text_size}{Size of the text on the x axis}
+
+\item{cluster_col}{The column name for clusters (default: "Cluster")}
 
 \item{filename}{Filename of the saved balloon plot}
 
