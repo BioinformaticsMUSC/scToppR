@@ -21,8 +21,8 @@ https://toppgene.cchmc.org/navigation/termsofuse.jsp
 This vignette shows the use of scToppR within a differential expression workflow. Using the 'airway' dataset, we'll perform a quick differential expression analysis using DESeq2. With the list of differentially expressed genes, we can easily use scToppR.
 
 ```{r setup}
-#library(scToppR)
-devtools::load_all("/Users/bryanwgranger/biocm/packages/scToppR")
+library(scToppR)
+
 suppressMessages({
   library(airway)
   library(DESeq2)

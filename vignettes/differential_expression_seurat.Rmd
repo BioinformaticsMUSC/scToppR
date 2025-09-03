@@ -111,7 +111,7 @@ To save toppData results, scToppR also includes a toppSave() function. This func
 
 toppSave(toppData,
          filename = "IFNB_toppData",
-         save_dir = "./toppData_results"
+         save_dir = "./toppData_results",
          split = TRUE,
          format = "xlsx")
 
