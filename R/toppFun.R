@@ -172,7 +172,9 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
           if (nrow(d) == 0){
             missing_clusters = append(missing_clusters, col)
           } else {
-            d[['Cluster']] = col
+            if (type == "degs") {
+              d[['Cluster']] = col
+            } 
             big_df <- rbind(big_df, d)
           }
         } else {

@@ -4,6 +4,7 @@
 #' @param toppData A toppData results dataframe
 #' @param category The topp categories to plot
 #' @param clusters The cluster(s) to plot
+#' @param cluster_col The column name for clusters (default: "Cluster")
 #' @param p_val_adj The P-value correction method: "BH", "Bonferroni", "BY", or "none"
 #' @param p_val_display If "log", display the p-value in terms of -log10(p_value)
 #' @param num_terms The number of terms from the toppData results to be plotted, per cluster
@@ -35,6 +36,7 @@
 toppPlot <- function (toppData,
                       category,
                       clusters = NULL,
+                      cluster_col = "Cluster",
                       num_terms = 10,
                       p_val_adj="BH",
                       p_val_display="log",
@@ -52,6 +54,10 @@ toppPlot <- function (toppData,
     if (!(t %in% colnames(toppData))) {
       stop(paste0("The column ", t, " is missing from the toppData, please correct and retry."))
     }
+  }
+  GROUPBY_COL = cluster_col
+  if (!(GROUPBY_COL %in% colnames(toppData))) {
+    stop("Invalid cluster column: ", GROUPBY_COL, " not found in toppData. Select an existing column with `cluster_col = `")
   }
   #parse category - make sure it's in data and there is only 1
   if (!(category %in% unique(toppData$Category))){
@@ -119,7 +125,7 @@ toppPlot <- function (toppData,
     overall_plot_list = list()
       for (c in clusters) {
         overall_plot_list[[c]] <- tmp_data |>
-          dplyr::filter(Cluster == c) |>
+          dplyr::filter(!!as.name(GROUPBY_COL) == c) |>
           dplyr::filter(Category == category) |>
           dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
           #dplyr::mutate(Name = forcats::fct_reorder(Name, -!!as.name(p_val_display_column))) |>
@@ -164,7 +170,7 @@ toppPlot <- function (toppData,
   } else if (length(clusters) == 1) {
     c = clusters[1]
       single_plot <- tmp_data |>
-        dplyr::filter(Cluster == c) |>
+        dplyr::filter(!!as.name(GROUPBY_COL) == c) |>
         dplyr::filter(Category == category) |>
         dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
         #dplyr::mutate(Name = forcats::fct_reorder(Name, geneRatio)) |>
@@ -238,6 +244,7 @@ toppPlot <- function (toppData,
 #'
 #' @param toppData A toppData results dataframe
 #' @param categories The topp categories to plot
+#' @param cluster_col The column name for clusters (default: "Cluster")
 #' @param balloons Number of balloons per group to plot
 #' @param filename Filename of the saved balloon plot
 #' @param save Save the balloon plot if TRUE
@@ -259,6 +266,7 @@ toppBalloon <- function (toppData,
                          categories = NULL,
                          balloons = 3,
                          x_axis_text_size = 6,
+                         cluster_col="Cluster",
                          filename = NULL,
                          save = FALSE,
                          height = 5,
@@ -267,6 +275,10 @@ toppBalloon <- function (toppData,
   if (is.null(categories)) {
     categories <- unique(toppData[["Category"]])
   }
+  GROUPBY_COL = cluster_col
+  if (!(GROUPBY_COL %in% colnames(toppData))) {
+    stop("Invalid cluster column: ", GROUPBY_COL, " not found in toppData. Select an existing column with `cluster_col = `")
+  }
   balloon_list <- list()
   for (cat in categories) {
     cat("Balloon Plot:", cat)
@@ -274,12 +286,12 @@ toppBalloon <- function (toppData,
       dplyr::filter(Category == cat) |>
       dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-      dplyr::group_by(Cluster) |>
+      dplyr::group_by(!!as.name(GROUPBY_COL)) |>
       dplyr::slice_max(order_by=nlog10_fdr, n=balloons, with_ties = FALSE) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
       ggplot(aes(
-        x=forcats::fct_reorder(Name, Cluster),
-        y=Cluster,
+        x=forcats::fct_reorder(Name, !!as.name(GROUPBY_COL)),
+        y=!!as.name(GROUPBY_COL),
       )) +
       ggplot2::geom_point(aes(size=geneRatio, color=nlog10_fdr)) +
       viridis::scale_color_viridis(option = "C") +
@@ -302,10 +314,6 @@ toppBalloon <- function (toppData,
     cat("\n")
 
   }
-  # if (length(balloon) == 1) {
-  #   print(balloon[1])
-  # }
-  #return (balloon)
   if (length(balloon_list) == 1){
     balloon_list[[1]]
   } else {
