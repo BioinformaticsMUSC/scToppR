@@ -349,7 +349,13 @@ get_topp <- function(gene_list,
                "TotalGenes","GenesInTerm","GenesInQuery","GenesInTermInQuery","Source","URL")
   results_df <- data.frame()
   for (i in 1:length(response_data)) {
-    results_df <- rbind(results_df,response_data[[i]][keepers])
+    tmp_results <- as.data.frame(response_data[[i]][keepers])
+    genes = c()
+    for (g in response_data[[i]]$Genes) {
+      genes = c(genes, g$Symbol)
+    }
+    tmp_results$Genes <- paste(genes, collapse = ", ")
+    results_df <- rbind(results_df,tmp_results)
   }
   return (results_df)
 }
