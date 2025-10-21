@@ -1,0 +1,17 @@
+CHANGES IN VERSION 0.99.4
+------------------------
+ - added max.overlaps and min.segment.length to provide further control over
+   connectors. max.overlaps replaces maxoverlapsConnectors, but both can still
+   be used for legacy purposes
+
+CHANGES IN VERSION 0.99.3
+------------------------
+
+- New vignette created to show interoperability with standard Bioconductor classes
+- Added language to toppFun() function, README.md, and vignettes reminding users about using data from ToppGene
+
+CHANGES IN VERSION 0.99.2
+------------------------
+- toppPlot parameter `filename` changed to `file_prefix` for clarity
+- toppSave function now has a `save_dir` parameter, allowing users to specify a save directory
+

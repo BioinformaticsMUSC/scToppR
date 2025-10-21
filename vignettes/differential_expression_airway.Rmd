@@ -1,25 +1,46 @@
 ---
 title: "scToppR with differential expression, Airway dataset"
-output: rmarkdown::html_vignette
+package: "`r pkg_ver('scToppR')`"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{differential_expression_airway}
+  %\VignetteIndexEntry{1. Introduction to scToppR using the Airway dataset}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+```{r, echo = FALSE}
+  suppressWarnings(library(knitr))
+
+  opts_chunk$set(tidy = FALSE, message = FALSE, warning = FALSE)
 ```
 
+# Introduction
 
-scToppR is a package that allows seamless, workflow-based interaction with ToppGene, a portal for gene enrichment analysis. Researchers can use scToppR to directly query ToppGene's databases and conduct analysis with a few lines of code. The use of data from ToppGene is governed by their Terms of Use:
-https://toppgene.cchmc.org/navigation/termsofuse.jsp
+scToppR is a package that allows seamless, workflow-based interaction with ToppGene, a portal for gene enrichment analysis. Researchers can use scToppR to directly query ToppGene's databases and conduct analysis with a few lines of code. scToppR's availability on Bioconductor ensures easy installation and integration with other Bioconductor workflows, allowing researchers to incorporate functional enrichment analysis from ToppGene into their existing pipelines.
+
+The use of data from ToppGene is governed by their Terms of Use:
+https://toppgene.cchmc.org/navigation/termsofuse.jsp 
 
 This vignette shows the use of scToppR within a differential expression workflow. Using the 'airway' dataset, we'll perform a quick differential expression analysis using DESeq2. With the list of differentially expressed genes, we can easily use scToppR.
 
+# Installation
+
+```{r installation, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("scToppR")  
+```
+
+```{r installation, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("scToppR")  
+```
+
+# Load Data and Perform Differential Expression Analysis
 ```{r setup}
 library(scToppR)
 
@@ -48,6 +69,7 @@ res$gene <- rownames(res)
 res$cluster <- "cluster0"
 ```
 
+# Using scToppR with Differential Expression Results
 With these results, we will use scToppR to querry the ToppGene database for all categories for each cluster using the toppFun() function. This function requires users to specify the columns in their dataset.
 
 ```{r toppFun}
@@ -62,6 +84,7 @@ head(toppData)
 
 As the code reminds you, the use of this data must be done so in accordance with ToppGene's Terms of Use. For more information, please visit: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 
+# Visualizing ToppGene Results
 The toppData dataframe includes all results from toppGene. We can use this dataframe to quickly generate pathway analysis plots using the toppPlot() function. The function can be used to generate a single plot, for example:
 
 ```{r plot1, fig.dim=c(8,8)}
@@ -78,7 +101,6 @@ plot_list <- toppPlot(toppData,
          clusters = NULL)
 plot_list[1]
 ```
-
 
 All of these plots can also be automatically saved by the toppPlot() function. The files and their save locations can be set using the parameters:
 -save = TRUE
@@ -119,6 +141,7 @@ toppBalloon(toppData,
             categories = "Pubmed")
 ```
 
+# Saving ToppGene Results 
 To save toppData results, scToppR also includes a toppSave() function. This function can save the toppData results as a single file, or it can split the data into different clusters/celltypes and save each individually. To do so, set `save = TRUE` in the function call. The function saves the files as Excel spreadsheets by default, but this can be changed to .csv or .tsv files using the `format` parameter.
 
 ```{r save, eval=FALSE}
