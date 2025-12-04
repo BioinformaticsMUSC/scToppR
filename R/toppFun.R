@@ -91,7 +91,7 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
       stop("please select one of c('ALL', 'UPREG', 'DOWNREG') for fc_filter")
     }
     if (direction_mode == "all") {
-    gene_data <- process_degs(degs=input_data,
+    gene_data <- .process_degs(degs=input_data,
                                    cluster_col=cluster_col,
                                    gene_col=gene_col,
                                    p_val_col = p_val_col,
@@ -105,7 +105,7 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
       gene_data_split = list()
       print(input_data)
       input_data_up <- input_data |> dplyr::filter(!!as.name(logFC_col) > fc_cutoff)
-      gene_data_split[['up']] <- process_degs(degs=input_data_up,
+      gene_data_split[['up']] <- .process_degs(degs=input_data_up,
                                               cluster_col=cluster_col,
                                               gene_col=gene_col,
                                               p_val_col = p_val_col,
@@ -116,7 +116,7 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                                               genes_submit_cutoff=genes_submit_cutoff,
                                               fc_filter=fc_filter)
       input_data_down <- input_data |> dplyr::filter(abs(!!as.name(logFC_col)) > fc_cutoff & !!as.name(logFC_col) < 0)
-      gene_data_split[['down']] <- process_degs(degs=input_data_down,
+      gene_data_split[['down']] <- .process_degs(degs=input_data_down,
                                               cluster_col=cluster_col,
                                               gene_col=gene_col,
                                               p_val_col = p_val_col,
@@ -160,7 +160,7 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
             cat('Working on cluster:', col, '\n')
           }
 
-          d <- get_topp(gene_list = gene_list,
+          d <- .get_topp(gene_list = gene_list,
                         topp_categories = topp_categories,
                         key_type = "SYMBOL",
                         pval_cutoff=pval_cutoff,
@@ -193,7 +193,7 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
               cat('Working on cluster:', col, fc_direction, '\n')
             }
 
-            d <- get_topp(gene_list = gene_list,
+            d <- .get_topp(gene_list = gene_list,
                           topp_categories = topp_categories,
                           key_type = "SYMBOL",
                           pval_cutoff=pval_cutoff,
@@ -254,7 +254,7 @@ get_Entrez<- function(genes){
 }
 
 ##### PROCESS MARKER INPUTS
-process_degs <- function (degs, cluster_col, gene_col, p_val_col, logFC_col,
+.process_degs <- function (degs, cluster_col, gene_col, p_val_col, logFC_col,
                              num_genes=1000,
                              pval_cutoff=0.5,
                              fc_cutoff=0,
@@ -303,7 +303,7 @@ process_degs <- function (degs, cluster_col, gene_col, p_val_col, logFC_col,
   return (marker_list)
 }
 
-get_topp <- function(gene_list,
+.get_topp <- function(gene_list,
                       key_type,
                       topp_categories,
                       max_results=10,
@@ -312,8 +312,7 @@ get_topp <- function(gene_list,
                       pval_cutoff=0.05,
                       correction="FDR") {
 
-  #assertions - to add
-  #print(gene_list)
+
   #convert gene names if necessary
   if (key_type != 'ENTREZ') {
     new_gene_list = get_Entrez(gene_list)
@@ -395,6 +394,8 @@ get_ToppCats <- function() {
 #' @param save_dir the directory to save files
 #' @param split Boolean, whether to split the dataframe by celltype/cluster
 #' @param format Saved file format, one of c("xlsx", "csv", "tsv")
+#' @param cluster_col Column name for the groups of cells (e.g. cluster or celltype), usually "Cluster"
+#' @param verbose Verbosity setting, TRUE or FALSE
 #' @returns A saved file
 #' @importFrom openxlsx write.xlsx
 #' @importFrom stringr str_glue
@@ -405,113 +406,130 @@ get_ToppCats <- function() {
 #' toppSave(toppData, filename="toppFun_results", split = TRUE, format = "xlsx")
 #' @export
 toppSave <- function (toppData,
-                      filename = NULL,
+                      filename = "toppData_results",
                       save_dir = NULL,
                       split = TRUE,
-                      format = "xlsx") {
+                      format = "xlsx",
+                      cluster_col = "Cluster",
+                      verbose = TRUE) {
   if (is.null(save_dir)) {
-    save_dir = getwd()
+    stop("Please specify a `save_dir` to save the file(s)")
+  }
+  if (!(format %in% c("xlsx", "csv", "tsv"))) {
+    stop("Please select one of c('xlsx', 'csv', 'tsv') for format")
   }
   if (isTRUE(split)) {
-    for (gr in unique(toppData$Cluster)) {
+    if (!(cluster_col %in% colnames(toppData))) {
+    stop(paste0("Cannot split by cluster column `", cluster_col, "` as it is not found in toppData. Please specify the correct column name."))
+  }
+    for (clust in unique(toppData[[cluster_col]])) {
       tmp_toppData <- toppData |>
-        dplyr::filter(Cluster == gr)
+        dplyr::filter(!!as.name(cluster_col) == clust)
+      # Replace whitespace in cluster name for filename compatibility
+      clust <- gsub("\\s+", "_", clust)
+      filename_with_cluster <- stringr::str_glue("{filename}_{clust}")
 
       if (format == 'xlsx') {
-
-        if (is.null(filename)) {
-          this_file = stringr::str_glue("toppData_{gr}.xlsx")
-        } else {
-          this_file = stringr::str_glue("{filename}_{gr}.xlsx")
-        }
-
-        openxlsx::write.xlsx(tmp_toppData,
-                             file = file.path(save_dir, this_file),
-                             colNames = TRUE,
-                             rowNames = FALSE,
-                             borders = "columns",
-                             sheetName="toppData",
-                             overwrite = TRUE)
-        cat("Saving file:", this_file, "\n")
-
+        .save_xlsx(
+            toppData = tmp_toppData,
+            filename = filename_with_cluster,
+            save_dir = save_dir,
+            verbose = verbose
+        )
       } else if (format == "csv") {
-        if (is.null(filename)) {
-          this_file = stringr::str_glue("toppData_{gr}.csv")
-        } else {
-          this_file = stringr::str_glue("{filename}_{gr}.csv")
-        }
-
-        utils::write.table(tmp_toppData,
-                  file = file.path(save_dir, this_file),
-                  sep = "\t",
-                  quote = FALSE,
-                  row.names = FALSE,
-                  col.names = TRUE)
-        cat("Saving file:", this_file, "\n")
+        .save_csv(
+            toppData = tmp_toppData,
+            filename = filename_with_cluster,
+            save_dir = save_dir,
+            verbose = verbose
+        )
       } else if (format == "tsv") {
-      if (is.null(filename)) {
-        this_file = stringr::str_glue("toppData_{gr}.tsv")
-      } else {
-        this_file = stringr::str_glue("{filename}_{gr}.tsv")
-      }
-
-        utils::write.table(tmp_toppData,
-                  file = file.path(save_dir, this_file),
-                  sep = "\t",
-                  quote = FALSE,
-                  row.names = FALSE,
-                  col.names = TRUE)
-        cat("Saving file:", this_file, "\n")
+        .save_tsv(
+            toppData = tmp_toppData,
+            filename = filename_with_cluster,
+            save_dir = save_dir,
+            verbose = verbose
+        )
       }
     }
   } else {
       if (format == 'xlsx') {
-
-        if (is.null(filename)) {
-          this_file = stringr::str_glue("toppData.xlsx")
-        } else {
-          this_file = stringr::str_glue("{filename}.xlsx")
-        }
-
-        openxlsx::write.xlsx(toppData,
-                             file = file.path(save_dir, this_file),
-                             colNames = TRUE,
-                             rowNames = FALSE,
-                             borders = "columns",
-                             sheetName="toppData",
-                             overwrite = TRUE)
-        cat("Saving file:", this_file, "\n")
+        .save_xlsx(
+            toppData = toppData,
+            filename = filename,
+            save_dir = save_dir,
+            verbose = verbose
+        )
 
       } else if (format == "csv") {
-        if (is.null(filename)) {
-          this_file = stringr::str_glue("toppData.csv")
-        } else {
-          this_file = stringr::str_glue("{filename}.csv")
-        }
-
-        utils::write.table(toppData,
-                  file = file.path(save_dir, this_file),
-                  sep = ",",
-                  quote = FALSE,
-                  row.names = FALSE,
-                  col.names = TRUE)
-        cat("Saving file:", this_file, "\n")
+        .save_csv(
+            toppData = toppData,
+            filename = filename,
+            save_dir = save_dir,
+            verbose = verbose
+        )
       } else if (format == "tsv") {
-      if (is.null(filename)) {
-        this_file = stringr::str_glue("toppData.tsv")
-      } else {
-        this_file = stringr::str_glue("{filename}.tsv")
-      }
+      .save_tsv(
+          toppData = toppData,
+          filename = filename,
+          save_dir = save_dir,
+          verbose = verbose
+      )
+    }
+  }
+}
 
-      utils::write.table(toppData,
-                  file = file.path(save_dir, this_file),
-                  sep = "\t",
-                  quote = FALSE,
+.save_xlsx <- function(
+    toppData,
+    filename,
+    save_dir,
+    verbose = TRUE
+) {
+    save_filename = stringr::str_glue("{filename %||% 'toppData_results'}.xlsx")
+    openxlsx::write.xlsx(toppData,
+                         file = file.path(save_dir, save_filename),
+                         colNames = TRUE,
+                         rowNames = FALSE,
+                         borders = "columns",
+                         sheetName="toppData",
+                         overwrite = TRUE)
+    if (isTRUE(verbose)) {
+      message("Saving file:", file.path(save_dir, save_filename), "\n")
+    }
+}
+
+.save_csv <- function(
+    toppData,
+    filename,
+    save_dir,
+    verbose = TRUE
+) {
+    save_filename = stringr::str_glue("{filename %||% 'toppData_results'}.csv")
+    utils::write.table(toppData,
+                  file = file.path(save_dir, save_filename),
+                  sep = ",",
+                  quote = TRUE, #needed for the list of genes separated by commas
                   row.names = FALSE,
                   col.names = TRUE)
-      cat("Saving file:", this_file, "\n")
+   if (isTRUE(verbose)) {
+      message("Saving file:", file.path(save_dir, save_filename), "\n")
     }
+}
 
-  }
-
+.save_tsv <- function(
+    toppData,
+    filename,
+    save_dir,
+    verbose = TRUE
+) {
+    save_filename = stringr::str_glue("{filename %||% 'toppData_results'}.tsv")
+    utils::write.table(toppData,
+                  file = file.path(save_dir, save_filename),
+                  sep = "\t",
+                  quote = TRUE,
+                  row.names = FALSE,
+                  col.names = TRUE)
+    if (isTRUE(verbose)) {
+      message("Saving file:", file.path(save_dir, save_filename), "\n")
+    }
 }

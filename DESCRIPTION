@@ -12,7 +12,6 @@ Imports:
     dplyr,
     forcats,
     ggplot2,
-    rjson,
     stringr,
     openxlsx,
     viridis,

@@ -17,7 +17,7 @@ toppPlot(
   save_dir = NULL,
   width = 5,
   height = 6,
-  file_prefix = NULL,
+  file_prefix = "toppPlot",
   y_axis_text_size = 8,
   combine = FALSE,
   ncols = NULL
@@ -63,10 +63,11 @@ NEW: this accepts only 1 category
 }
 \examples{
 data("toppData")
+\dontrun{
 toppPlot(toppData,
     category="GeneOntologyMolecularFunction",
     clusters=0,
     save=TRUE,
     file_prefix="MF_cluster0")
-
+}
 }

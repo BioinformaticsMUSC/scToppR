@@ -9,3 +9,7 @@ table_for_markdown.txt
 .DS_Store
 .Rhistory
 inst/doc
+
+other*
+/doc/
+/Meta/

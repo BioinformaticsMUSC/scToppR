@@ -34,12 +34,6 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("scToppR")  
 ```
 
-```{r installation, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("scToppR")  
-```
-
 # Load Data and Perform Differential Expression Analysis
 ```{r setup}
 library(scToppR)

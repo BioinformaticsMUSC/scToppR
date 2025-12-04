@@ -10,8 +10,9 @@ toppBalloon(
   balloons = 3,
   x_axis_text_size = 6,
   cluster_col = "Cluster",
-  filename = NULL,
+  filename = "toppBalloon",
   save = FALSE,
+  save_dir = NULL,
   height = 5,
   width = 10
 )
@@ -31,6 +32,8 @@ toppBalloon(
 
 \item{save}{Save the balloon plot if TRUE}
 
+\item{save_dir}{Directory to save the balloon plot}
+
 \item{height}{Height of the saved balloon plot}
 
 \item{width}{Width of the saved balloon plot}
@@ -43,6 +46,8 @@ Create a balloon plot from toppdata results
 }
 \examples{
 data("toppData")
+\dontrun{
 toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
+}
 
 }

@@ -8,7 +8,7 @@ Please note: The use of any data from ToppGene is governed by their [Terms of Us
 
 ## Installation
 
-This package can be installed from Bioonductor:
+This package can be installed from BioConductor:
 ```
 if (!requireNamespace('BiocManager', quietly = TRUE))
 install.packages('BiocManager')
