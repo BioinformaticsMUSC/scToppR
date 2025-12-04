@@ -16,5 +16,5 @@ a vector of genes in Entrez format
 Convert genes into Entrez format
 }
 \examples{
-get_Entrez(genes=c("IFNG", "FOXP3"))
+get_Entrez(genes = c("IFNG", "FOXP3"))
 }

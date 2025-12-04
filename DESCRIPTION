@@ -19,7 +19,7 @@ Imports:
     utils,
     httr2
 Depends: 
-    R (>= 4.3.0)
+    R (>= 4.4.0)
 LazyData: false
 Suggests: 
     airway,

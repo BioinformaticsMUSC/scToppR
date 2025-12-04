@@ -87,5 +87,6 @@ toppData <- toppFun(ifnb.de,
     cluster_col = "celltype",
     gene_col = "gene",
     p_val_col = "p_val_adj",
-    logFC_col = "avg_log2FC")
+    logFC_col = "avg_log2FC"
+)
 }

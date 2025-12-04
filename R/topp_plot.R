@@ -9,27 +9,27 @@
   color_label = "Adjusted P-value",
   y_axis_text_size = 10
 ) {
-  return_plot <- topp_results |>
-    dplyr::filter(!!as.name(groupby_col) == cluster) |>
-    dplyr::filter(Category == category) |>
-    dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-    dplyr::arrange(-!!as.name(p_val_display_column)) |>
-    utils::head(num_terms) |>
-    ggplot2::ggplot(mapping = aes(
-      x = geneRatio,
-      y = forcats::fct_reorder(Name, geneRatio)
-    )) +
-    ggplot2::geom_segment(aes(xend = 0, yend = Name)) +
-    ggplot2::geom_point(mapping = aes(size = GenesInTermInQuery, color = !!as.name(p_val_display_column))) +
-    viridis::scale_color_viridis(option = "C") +
-    ggplot2::theme_bw() +
-    ggplot2::ylab(category) +
-    ggplot2::ggtitle(stringr::str_glue("Cluster {cluster}")) +
-    ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
-    ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = FALSE)) +
-    ggplot2::labs(color = color_label, size = "Genes from Query\n in Gene Set")
+    return_plot <- topp_results |>
+        dplyr::filter(!!as.name(groupby_col) == cluster) |>
+        dplyr::filter(Category == category) |>
+        dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
+        dplyr::arrange(-!!as.name(p_val_display_column)) |>
+        utils::head(num_terms) |>
+        ggplot2::ggplot(mapping = aes(
+            x = geneRatio,
+            y = forcats::fct_reorder(Name, geneRatio)
+        )) +
+        ggplot2::geom_segment(aes(xend = 0, yend = Name)) +
+        ggplot2::geom_point(mapping = aes(size = GenesInTermInQuery, color = !!as.name(p_val_display_column))) +
+        viridis::scale_color_viridis(option = "C") +
+        ggplot2::theme_bw() +
+        ggplot2::ylab(category) +
+        ggplot2::ggtitle(stringr::str_glue("Cluster {cluster}")) +
+        ggplot2::theme(axis.text.y = ggplot2::element_text(size = y_axis_text_size)) +
+        ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 20, whitespace_only = FALSE)) +
+        ggplot2::labs(color = color_label, size = "Genes from Query\n in Gene Set")
 
-  return(return_plot)
+    return(return_plot)
 }
 
 # helper function to save plot
@@ -42,19 +42,16 @@
   height = 6,
   verbose = TRUE
 ) {
-  plot_filename <- stringr::str_glue("{file_prefix}_{category}.pdf")
-  message("plot_filename:", plot_filename)
-  print(save_dir)
-  print(file.path(save_dir, plot_filename))
-  ggplot2::ggsave(
-    filename = file.path(save_dir, plot_filename),
-    plot = plot,
-    width = width, height = height
-  )
-  if (isTRUE(verbose)) {
-    save_msg <- stringr::str_glue("Plot saved to {file.path(save_dir, plot_filename)}\n")
-    cat(save_msg)
-  }
+    plot_filename <- stringr::str_glue("{file_prefix}_{category}.pdf")
+    ggplot2::ggsave(
+        filename = file.path(save_dir, plot_filename),
+        plot = plot,
+        width = width, height = height
+    )
+    if (isTRUE(verbose)) {
+        save_msg <- stringr::str_glue("Plot saved to {file.path(save_dir, plot_filename)}")
+        message(save_msg)
+    }
 }
 
 
@@ -86,15 +83,12 @@
 #' @importFrom utils head
 #' @examples
 #' data("toppData")
-#' \dontrun{
+
 #' toppPlot(toppData,
-#'   category = "GeneOntologyMolecularFunction",
-#'   clusters = 0,
-#'   save = TRUE,
-#'   file_prefix = "MF_cluster0",
-#'   save_dir = "/path/to/save/dir"
+#'     category = "GeneOntologyMolecularFunction",
+#'     clusters = 0,
+#'     save = FALSE
 #' )
-#' }
 #' @export
 toppPlot <- function(toppData,
                      category,
@@ -111,146 +105,145 @@ toppPlot <- function(toppData,
                      y_axis_text_size = 8,
                      combine = FALSE,
                      ncols = NULL) {
-  # check for correct columns
-  test_cols <- c("Category", "Name", "PValue", "GenesInTerm", "GenesInQuery", "GenesInTermInQuery")
-  for (t in test_cols) {
-    if (!(t %in% colnames(toppData))) {
-      stop(paste0("The column ", t, " is missing from the toppData, please correct and retry."))
+    # check for correct columns
+    test_cols <- c("Category", "Name", "PValue", "GenesInTerm", "GenesInQuery", "GenesInTermInQuery")
+    for (t in test_cols) {
+        if (!(t %in% colnames(toppData))) {
+            msg <- paste0("The column ", t, " is missing from the toppData, please correct and retry.")
+            stop(msg)
+        }
     }
-  }
-  GROUPBY_COL <- cluster_col
-  if (!(GROUPBY_COL %in% colnames(toppData))) {
-    stop("Invalid cluster column: ", GROUPBY_COL, " not found in toppData. Select an existing column with `cluster_col = `")
-  }
-  # parse category - make sure it's in data and there is only 1
-  if (!(category %in% unique(toppData$Category))) {
-    stop(paste0(
-      "Category ", category, " not found in the data. Please select one of ",
-      stringr::str_c(unique(toppData$Category), collapse = ", ")
-    ))
-  } else if (is.null(category)) {
-    stop(paste0(
-      "Please select one of these categories: ",
-      stringr::str_c(unique(toppData$Category), collapse = ", ")
-    ))
-  }
-
-  # parse clusters - if null, then get all unique clusters
-  if (is.null(clusters)) {
-    clusters <- unique(toppData[[GROUPBY_COL]])
-  }
-  # parse save
-  if (isTRUE(save)) {
-    if (is.null(save_dir)) {
-      stop("Please provide a directory to save the plot using the `save_dir` parameter.")
+    GROUPBY_COL <- cluster_col
+    if (!(GROUPBY_COL %in% colnames(toppData))) {
+        stop("Invalid cluster column: ", GROUPBY_COL, " not found in toppData. Select an existing column with `cluster_col = `")
     }
-  }
-
-
-  # parse pvalue
-  if (!(p_val_adj %in% c("BH", "Bonferroni", "BY", "none", "None", "log"))) {
-    cat("P value adjustment not found - using 'BH' by default. For no adjustment, use p_val_adj = 'none'.")
-  }
-  p_val_col <- switch(p_val_adj,
-    "BH" = "QValueFDRBH",
-    "Bonferroni" = "QValueBonferroni",
-    "BY" = "QvalueFDRBY",
-    "none" = "PValue",
-    "None" = "PValue",
-    "QValueFDRBH"
-  )
-
-
-  plot_data <- toppData
-
-  if (p_val_display == "log") {
-    color_label <- "-Log10(FDR)"
-    plot_data <- plot_data |>
-      dplyr::mutate(nlog10_fdr = -log10(!!as.name(p_val_col)))
-    p_val_display_column <- "nlog10_fdr"
-  } else if (p_val_col %in% c("QValueFDRBH", "QValueBonferroni", "QvalueFDRBY")) {
-    color_label <- "Adj. P-value"
-    p_val_display_column <- p_val_col
-  } else {
-    color_label <- "P-value"
-    p_val_display_column <- p_val_col
-  }
-
-  ###
-  ### MAIN PLOTTING SECTION
-  ###
-
-  if (length(clusters) > 1) {
-    if (!isTRUE(combine)) {
-      cat("Multiple clusters entered: function returns a list of ggplots\n")
+    # parse category - make sure it's in data and there is only 1
+    if (!(category %in% unique(toppData$Category))) {
+        stop(paste0(
+            "Category ", category, " not found in the data. Please select one of ",
+            stringr::str_c(unique(toppData$Category), collapse = ", ")
+        ))
+    } else if (is.null(category)) {
+        stop(paste0(
+            "Please select one of these categories: ",
+            stringr::str_c(unique(toppData$Category), collapse = ", ")
+        ))
     }
-    overall_plot_list <- list()
-    for (clust in clusters) {
-      cur_plot <- .sctoppr_dotplot(
-        topp_results = plot_data,
-        category = category,
-        groupby_col = GROUPBY_COL,
-        cluster = clust,
-        num_terms = num_terms,
-        p_val_display_column = p_val_display_column,
-        color_label = color_label,
-        y_axis_text_size = y_axis_text_size
-      )
-      # Save individual plots if specified
-      if (isTRUE(save)) {
-        # add cluster name to filename prefix
-        filename_with_clust <- stringr::str_glue("{file_prefix %||% 'toppPlot'}_{clust}")
-        message("Saving plot for cluster:", clust)
-        message("filename_with_clust:", filename_with_clust)
-        .sctoppr_saveplot(
-          plot = cur_plot,
-          category = category,
-          file_prefix = filename_with_clust,
-          save_dir = save_dir,
-          width = width,
-          height = height
-        )
-      }
-      overall_plot_list[[clust]] <- cur_plot
+
+    # parse clusters - if null, then get all unique clusters
+    if (is.null(clusters)) {
+        clusters <- unique(toppData[[GROUPBY_COL]])
     }
-    # Combine plots if specified
-    if (isTRUE(combine)) {
-      if (is.null(ncols)) {
-        ncols <- min(3, length(overall_plot_list))
-      }
-      combined_plots <- patchwork::wrap_plots(overall_plot_list, ncol = ncols) +
-        patchwork::plot_annotation(title = category)
-      return(combined_plots)
-    } else {
-      return(overall_plot_list)
+    # parse save
+    if (isTRUE(save)) {
+        if (is.null(save_dir)) {
+            stop("Please provide a directory to save the plot using the `save_dir` parameter.")
+        }
     }
-    # only one cluster
-  } else if (length(clusters) == 1) {
-    c <- clusters[1]
-    single_plot <- .sctoppr_dotplot(
-      topp_results = plot_data,
-      category = category,
-      groupby_col = GROUPBY_COL,
-      cluster = c,
-      num_terms = num_terms,
-      p_val_display_column = p_val_display_column,
-      color_label = color_label,
-      y_axis_text_size = y_axis_text_size
+    # parse pvalue
+    if (!(p_val_adj %in% c("BH", "Bonferroni", "BY", "none", "None", "log"))) {
+        warning("P value adjustment not found - using 'BH' by default. For no adjustment, use p_val_adj = 'none'.")
+    }
+    p_val_col <- switch(p_val_adj,
+        "BH" = "QValueFDRBH",
+        "Bonferroni" = "QValueBonferroni",
+        "BY" = "QvalueFDRBY",
+        "none" = "PValue",
+        "None" = "PValue",
+        "QValueFDRBH"
     )
 
-    # Save individual plot if specified
-    if (isTRUE(save)) {
-      .sctoppr_saveplot(
-        plot = single_plot,
-        category = category,
-        file_prefix = file_prefix,
-        save_dir = save_dir,
-        width = width,
-        height = height
-      )
+
+    plot_data <- toppData
+
+    if (p_val_display == "log") {
+        color_label <- "-Log10(FDR)"
+        plot_data <- plot_data |>
+            dplyr::mutate(nlog10_fdr = -log10(!!as.name(p_val_col)))
+        p_val_display_column <- "nlog10_fdr"
+    } else if (p_val_col %in% c("QValueFDRBH", "QValueBonferroni", "QvalueFDRBY")) {
+        color_label <- "Adj. P-value"
+        p_val_display_column <- p_val_col
+    } else {
+        color_label <- "P-value"
+        p_val_display_column <- p_val_col
     }
-    return(single_plot)
-  }
+
+    ###
+    ### MAIN PLOTTING SECTION
+    ###
+
+    if (length(clusters) > 1) {
+        if (!isTRUE(combine)) {
+            message("Multiple clusters entered: function returns a list of ggplots")
+        }
+        overall_plot_list <- list()
+        for (clust in clusters) {
+            cur_plot <- .sctoppr_dotplot(
+                topp_results = plot_data,
+                category = category,
+                groupby_col = GROUPBY_COL,
+                cluster = clust,
+                num_terms = num_terms,
+                p_val_display_column = p_val_display_column,
+                color_label = color_label,
+                y_axis_text_size = y_axis_text_size
+            )
+            # Save individual plots if specified
+            if (isTRUE(save)) {
+                # add cluster name to filename prefix
+                filename_with_clust <- stringr::str_glue("{file_prefix %||% 'toppPlot'}_{clust}")
+                message("Saving plot for cluster:", clust)
+                message("filename_with_clust:", filename_with_clust)
+                .sctoppr_saveplot(
+                    plot = cur_plot,
+                    category = category,
+                    file_prefix = filename_with_clust,
+                    save_dir = save_dir,
+                    width = width,
+                    height = height
+                )
+            }
+            overall_plot_list[[clust]] <- cur_plot
+        }
+        # Combine plots if specified
+        if (isTRUE(combine)) {
+            if (is.null(ncols)) {
+                ncols <- min(3, length(overall_plot_list))
+            }
+            combined_plots <- patchwork::wrap_plots(overall_plot_list, ncol = ncols) +
+                patchwork::plot_annotation(title = category)
+            return(combined_plots)
+        } else {
+            return(overall_plot_list)
+        }
+        # only one cluster
+    } else if (length(clusters) == 1) {
+        c <- clusters[1]
+        single_plot <- .sctoppr_dotplot(
+            topp_results = plot_data,
+            category = category,
+            groupby_col = GROUPBY_COL,
+            cluster = c,
+            num_terms = num_terms,
+            p_val_display_column = p_val_display_column,
+            color_label = color_label,
+            y_axis_text_size = y_axis_text_size
+        )
+
+        # Save individual plot if specified
+        if (isTRUE(save)) {
+            .sctoppr_saveplot(
+                plot = single_plot,
+                category = category,
+                file_prefix = file_prefix,
+                save_dir = save_dir,
+                width = width,
+                height = height
+            )
+        }
+        return(single_plot)
+    }
 }
 
 #' Create a balloon plot from toppdata results
@@ -273,9 +266,7 @@ toppPlot <- function(toppData,
 #' @importFrom viridis scale_color_viridis
 #' @examples
 #' data("toppData")
-#' \dontrun{
-#' toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
-#' }
+#' toppBalloon(toppData, balloons = 3, save = FALSE)
 #'
 #' @export
 toppBalloon <- function(toppData,
@@ -288,55 +279,54 @@ toppBalloon <- function(toppData,
                         save_dir = NULL,
                         height = 5,
                         width = 10) {
-  if (is.null(categories)) {
-    categories <- unique(toppData[["Category"]])
-  }
-  GROUPBY_COL <- cluster_col
-  if (!(GROUPBY_COL %in% colnames(toppData))) {
-    stop("Invalid cluster column: ", GROUPBY_COL, " not found in toppData. Select an existing column with `cluster_col = `")
-  }
-  # parse save
-  if (isTRUE(save)) {
-    if (is.null(save_dir)) {
-      stop("Please provide a directory to save the plot using the `save_dir` parameter.")
+    if (is.null(categories)) {
+        categories <- unique(toppData[["Category"]])
     }
-  }
-  balloon_list <- list()
-  for (cat in categories) {
-    message("Creating Balloon Plot:", cat)
-    balloon_list[[cat]] <- toppData |>
-      dplyr::filter(Category == cat) |>
-      dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
-      dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-      dplyr::group_by(!!as.name(GROUPBY_COL)) |>
-      dplyr::slice_max(order_by = nlog10_fdr, n = balloons, with_ties = FALSE) |>
-      dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
-      ggplot(aes(
-        x = forcats::fct_reorder(Name, as.numeric(as.factor(!!as.name(GROUPBY_COL)))),
-        y = !!as.name(GROUPBY_COL),
-      )) +
-      ggplot2::geom_point(aes(size = geneRatio, color = nlog10_fdr)) +
-      viridis::scale_color_viridis(option = "C") +
-      ggplot2::labs(color = "-Log10(FDR)", size = "Gene Ratio") +
-      ggplot2::xlab(cat) +
-      ggplot2::theme_bw() +
-      ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = FALSE)) +
-      ggplot2::theme(
-        axis.text.x = ggplot2::element_text(size = x_axis_text_size, angle = 60, hjust = 1.1, vjust = 1.05),
-        panel.border = ggplot2::element_rect(color = NA)
-      )
-
-    # Save balloon plot if specified
+    GROUPBY_COL <- cluster_col
+    if (!(GROUPBY_COL %in% colnames(toppData))) {
+        stop("Invalid cluster column: ", GROUPBY_COL, " not found in toppData. Select an existing column with `cluster_col = `")
+    }
+    # parse save
     if (isTRUE(save)) {
-      plot_filename <- stringr::str_glue("{filename}_{cat}.pdf")
-      ggplot2::ggsave(plot_filename, height = height, width = width)
-      message("File saved to:", plot_filename)
+        if (is.null(save_dir)) {
+            stop("Please provide a directory to save the plot using the `save_dir` parameter.")
+        }
     }
-    cat("\n")
-  }
-  if (length(balloon_list) == 1) {
-    balloon_list[[1]]
-  } else {
-    return(balloon_list)
-  }
+    balloon_list <- list()
+    for (cat in categories) {
+        message("Creating Balloon Plot:", cat)
+        balloon_list[[cat]] <- toppData |>
+            dplyr::filter(Category == cat) |>
+            dplyr::mutate(nlog10_fdr = -log10(QValueFDRBH)) |>
+            dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
+            dplyr::group_by(!!as.name(GROUPBY_COL)) |>
+            dplyr::slice_max(order_by = nlog10_fdr, n = balloons, with_ties = FALSE) |>
+            dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
+            ggplot(aes(
+                x = forcats::fct_reorder(Name, as.numeric(as.factor(!!as.name(GROUPBY_COL)))),
+                y = !!as.name(GROUPBY_COL),
+            )) +
+            ggplot2::geom_point(aes(size = geneRatio, color = nlog10_fdr)) +
+            viridis::scale_color_viridis(option = "C") +
+            ggplot2::labs(color = "-Log10(FDR)", size = "Gene Ratio") +
+            ggplot2::xlab(cat) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 30, whitespace_only = FALSE)) +
+            ggplot2::theme(
+                axis.text.x = ggplot2::element_text(size = x_axis_text_size, angle = 60, hjust = 1.1, vjust = 1.05),
+                panel.border = ggplot2::element_rect(color = NA)
+            )
+
+        # Save balloon plot if specified
+        if (isTRUE(save)) {
+            plot_filename <- stringr::str_glue("{filename}_{cat}.pdf")
+            ggplot2::ggsave(plot_filename, height = height, width = width)
+            message("File saved to:", plot_filename)
+        }
+    }
+    if (length(balloon_list) == 1) {
+        balloon_list[[1]]
+    } else {
+        return(balloon_list)
+    }
 }

@@ -46,8 +46,7 @@ Create a balloon plot from toppdata results
 }
 \examples{
 data("toppData")
-\dontrun{
-toppBalloon(toppData, balloons = 3, save = TRUE, filename = "Balloon_plot")
-}
+toppBalloon(toppData, balloons = 3, save = FALSE)
+
 
 }

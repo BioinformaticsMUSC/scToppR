@@ -38,6 +38,6 @@ Save toppData results (optionally) split by celltype/cluster
 \examples{
 data("toppData")
 \dontrun{
-toppSave(toppData, filename="toppFun_results", split = TRUE, format = "xlsx")
+toppSave(toppData, filename = "toppFun_results", split = TRUE, format = "xlsx")
 }
 }

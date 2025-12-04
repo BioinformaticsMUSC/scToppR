@@ -13,8 +13,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
 
@@ -30,9 +30,10 @@ This vignette shows the use of scToppR within a differential expression workflow
 # Installation
 
 ```{r installation, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE))
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
-BiocManager::install("scToppR")  
+}
+BiocManager::install("scToppR")
 ```
 
 
@@ -65,14 +66,15 @@ This is a typical output from a differential expression analysis such as DESeq2,
 
 The pbmc.markers data is in the "degs" format, so we will set `type = "degs"` in the toppFun function. We will also need to specify the relevant columns for clusters, genes, p values, and log fold changes:
 ```{r toppFun_1}
-toppData <- toppFun(input_data = pbmc.markers,
-                    type = "degs",
-                    topp_categories = NULL, 
-                    cluster_col = "cluster", 
-                    gene_col = "gene",
-                    p_val_col = "p_val_adj",
-                    logFC_col = "avg_log2FC")
-
+toppData <- toppFun(
+    input_data = pbmc.markers,
+    type = "degs",
+    topp_categories = NULL,
+    cluster_col = "cluster",
+    gene_col = "gene",
+    p_val_col = "p_val_adj",
+    logFC_col = "avg_log2FC"
+)
 ```
 
 Additionally, you can run toppFun on all ToppGene categories by setting topp_categories to NULL. You may also provide 1 or more specific categories as a list. To see all ToppGene categories, you can also use the function get_ToppCats():
@@ -87,7 +89,6 @@ The results of toppFun are organized into a data frame as such:
 
 ```{r toppData_out}
 head(toppData)
-
 ```
 
 ## Plotting
@@ -95,9 +96,10 @@ head(toppData)
 scToppR can automatically create DotPlots for each ToppGene category. Simply run:
 
 ```{r toppPlot_1}
-plots <- toppPlot(toppData, 
-                  category = "GeneOntologyMolecularFunction", 
-                  clusters = NULL)
+plots <- toppPlot(toppData,
+    category = "GeneOntologyMolecularFunction",
+    clusters = NULL
+)
 plots[1]
 ```
 

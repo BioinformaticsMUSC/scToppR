@@ -63,12 +63,9 @@ NEW: this accepts only 1 category
 }
 \examples{
 data("toppData")
-\dontrun{
 toppPlot(toppData,
-    category="GeneOntologyMolecularFunction",
-    clusters=0,
-    save=TRUE,
-    file_prefix="MF_cluster0",
-    save_dir="/path/to/save/dir")
-}
+    category = "GeneOntologyMolecularFunction",
+    clusters = 0,
+    save = FALSE
+)
 }

@@ -12,9 +12,9 @@ vignette: >
 ---
 
 ```{r, echo = FALSE}
-  suppressWarnings(library(knitr))
+suppressWarnings(library(knitr))
 
-  opts_chunk$set(tidy = FALSE, message = FALSE, warning = FALSE)
+opts_chunk$set(tidy = FALSE, message = FALSE, warning = FALSE)
 ```
 
 # Introduction
@@ -29,9 +29,10 @@ This vignette shows the use of scToppR within a differential expression workflow
 # Installation
 
 ```{r installation, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE))
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
-BiocManager::install("scToppR")  
+}
+BiocManager::install("scToppR")
 ```
 
 # Load Data and Perform Differential Expression Analysis
@@ -39,8 +40,8 @@ BiocManager::install("scToppR")
 library(scToppR)
 
 suppressMessages({
-  library(airway)
-  library(DESeq2)
+    library(airway)
+    library(DESeq2)
 })
 data("airway")
 
@@ -51,15 +52,15 @@ dds <- DESeqDataSet(se, design = ~ cell + dex)
 
 smallestGroupSize <- 3
 keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
-dds <- dds[keep,]
+dds <- dds[keep, ]
 
 dds <- DESeq(dds)
 res <- results(dds)
 
-#add the gene names as a column in the results
+# add the gene names as a column in the results
 res$gene <- rownames(res)
 
-#add cluster column - here, with this bulk RNAseq data, we will only have 1 cluster
+# add cluster column - here, with this bulk RNAseq data, we will only have 1 cluster
 res$cluster <- "cluster0"
 ```
 
@@ -68,11 +69,12 @@ With these results, we will use scToppR to querry the ToppGene database for all 
 
 ```{r toppFun}
 toppData <- toppFun(res,
-                    type = "degs",
-                    gene_col = "gene",
-                    cluster_col = "cluster",
-                    p_val_col = "padj",
-                    logFC_col = "log2FoldChange")
+    type = "degs",
+    gene_col = "gene",
+    cluster_col = "cluster",
+    p_val_col = "padj",
+    logFC_col = "log2FoldChange"
+)
 head(toppData)
 ```
 
@@ -82,17 +84,19 @@ As the code reminds you, the use of this data must be done so in accordance with
 The toppData dataframe includes all results from toppGene. We can use this dataframe to quickly generate pathway analysis plots using the toppPlot() function. The function can be used to generate a single plot, for example:
 
 ```{r plot1, fig.dim=c(8,8)}
-toppPlot(toppData, 
-         category = "GeneOntologyMolecularFunction", 
-         clusters = "cluster0")
+toppPlot(toppData,
+    category = "GeneOntologyMolecularFunction",
+    clusters = "cluster0"
+)
 ```
 
 The toppPlot() function can also create a plot for each cluster for a specified category; simply assign the parameter `clusters` to NULL. In this case, the function will return a list of plots.
 
 ```{r plot_list, fig.dim=c(8,8)}
-plot_list <- toppPlot(toppData, 
-         category = "GeneOntologyMolecularFunction", 
-         clusters = NULL)
+plot_list <- toppPlot(toppData,
+    category = "GeneOntologyMolecularFunction",
+    clusters = NULL
+)
 plot_list[1]
 ```
 
@@ -104,19 +108,21 @@ All of these plots can also be automatically saved by the toppPlot() function. T
 The cluster/celltype name will be automatically added to the filename prior to saving.
 
 ```{r plot_save, eval=FALSE}
-plot_list <- toppPlot(toppData, 
-         category = "GeneOntologyMolecularFunction", 
-         clusters = NULL,
-         save = TRUE,
-         save_dir = "./GO_results",
-         file_prefix = "GO_molecular_function")
+plot_list <- toppPlot(toppData,
+    category = "GeneOntologyMolecularFunction",
+    clusters = NULL,
+    save = TRUE,
+    save_dir = "./GO_results",
+    file_prefix = "GO_molecular_function"
+)
 ```
 
 scToppR also uses the toppBalloon() function to create a balloon plot, allowing researchers to quickly compare the top terms from the ToppGene results.
 
 ```{r plot_balloon, fig.dim=c(8,5)}
 toppBalloon(toppData,
-            categories = "GeneOntologyBiologicalProcess")
+    categories = "GeneOntologyBiologicalProcess"
+)
 ```
 
 Some advantages of using scToppR in a pipeline include access to the other categories in ToppGene. Users can quickly view results from all ToppGene categories using these plotting function, or by examining the toppData results. For example, a user could explore any common results among celltypes in terms such as Pathway, ToppCell, and TFBS.
@@ -125,27 +131,28 @@ For example, a quick look at the toppBalloon plot for Pathway shows a distinctio
 
 ```{r plot_balloon2, fig.dim=c(8,5)}
 toppBalloon(toppData,
-            categories = "Pathway")
+    categories = "Pathway"
+)
 ```
 
 The Pubmed category also provides researchers with other papers exploring similar data:
 
 ```{r plot_balloon3, fig.dim=c(8,5)}
 toppBalloon(toppData,
-            categories = "Pubmed")
+    categories = "Pubmed"
+)
 ```
 
 # Saving ToppGene Results 
 To save toppData results, scToppR also includes a toppSave() function. This function can save the toppData results as a single file, or it can split the data into different clusters/celltypes and save each individually. To do so, set `save = TRUE` in the function call. The function saves the files as Excel spreadsheets by default, but this can be changed to .csv or .tsv files using the `format` parameter.
 
 ```{r save, eval=FALSE}
-
 toppSave(toppData,
-         filename = "airway_toppData",
-         save_dir = "./toppData_results",
-         split = TRUE,
-         format = "xlsx")
-
+    filename = "airway_toppData",
+    save_dir = "./toppData_results",
+    split = TRUE,
+    format = "xlsx"
+)
 ```
 
 
