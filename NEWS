@@ -1,8 +1,12 @@
+CHANGES IN VERSION 0.99.5
+------------------------
+ - refactored code for better efficiency
+ - changed all save functions to only save files if a filepath is specified
+ - added unit tests
+
 CHANGES IN VERSION 0.99.4
 ------------------------
- - added max.overlaps and min.segment.length to provide further control over
-   connectors. max.overlaps replaces maxoverlapsConnectors, but both can still
-   be used for legacy purposes
+ - added genes that match the ToppGene terms to the toppData result
 
 CHANGES IN VERSION 0.99.3
 ------------------------

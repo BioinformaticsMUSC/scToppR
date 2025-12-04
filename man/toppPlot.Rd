@@ -68,6 +68,7 @@ toppPlot(toppData,
     category="GeneOntologyMolecularFunction",
     clusters=0,
     save=TRUE,
-    file_prefix="MF_cluster0")
+    file_prefix="MF_cluster0",
+    save_dir="/path/to/save/dir")
 }
 }

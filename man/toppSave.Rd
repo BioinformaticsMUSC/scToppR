@@ -6,10 +6,12 @@
 \usage{
 toppSave(
   toppData,
-  filename = NULL,
+  filename = "toppData_results",
   save_dir = NULL,
   split = TRUE,
-  format = "xlsx"
+  format = "xlsx",
+  cluster_col = "Cluster",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ toppSave(
 \item{split}{Boolean, whether to split the dataframe by celltype/cluster}
 
 \item{format}{Saved file format, one of c("xlsx", "csv", "tsv")}
+
+\item{cluster_col}{Column name for the groups of cells (e.g. cluster or celltype), usually "Cluster"}
+
+\item{verbose}{Verbosity setting, TRUE or FALSE}
 }
 \value{
 A saved file

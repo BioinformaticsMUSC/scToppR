@@ -305,7 +305,7 @@ toppBalloon <- function (toppData,
       dplyr::slice_max(order_by=nlog10_fdr, n=balloons, with_ties = FALSE) |>
       dplyr::mutate(geneRatio = GenesInTermInQuery / GenesInTerm) |>
       ggplot(aes(
-        x=forcats::fct_reorder(Name, !!as.name(GROUPBY_COL)),
+        x=forcats::fct_reorder(Name, as.numeric(as.factor(!!as.name(GROUPBY_COL)))),
         y=!!as.name(GROUPBY_COL),
       )) +
       ggplot2::geom_point(aes(size=geneRatio, color=nlog10_fdr)) +

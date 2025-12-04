@@ -6,7 +6,7 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{1. Introduction to scToppR using the Airway dataset}
+  %\VignetteIndexEntry{2. Introduction to scToppR using the Airway dataset}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

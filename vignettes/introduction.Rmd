@@ -1,8 +1,12 @@
 ---
 title: "Introduction to scToppR"
-output: rmarkdown::html_vignette
+package: "`r pkg_ver('scToppR')`"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Introduction to scToppR}
+  %\VignetteIndexEntry{1. Introduction to scToppR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,8 +18,25 @@ knitr::opts_chunk$set(
 )
 ```
 
-This package functions as an API wrapper to [ToppGene](https://toppgene.cchmc.org/). It takes a file from Seurat's FindAllMarkers, Presto's Wilcoxauc functions, or similarly formatted data that contains columns of genes, groups of cells (clusters or celltypes), avg log fold changes, and p-values. 
+# Introduction
 
+scToppR is a package that allows seamless, workflow-based interaction with ToppGene, a portal for gene enrichment analysis. Researchers can use scToppR to directly query ToppGene's databases and conduct analysis with a few lines of code. scToppR's availability on Bioconductor ensures easy installation and integration with other Bioconductor workflows, allowing researchers to incorporate functional enrichment analysis from ToppGene into their existing pipelines.
+
+The use of data from ToppGene is governed by their Terms of Use:
+https://toppgene.cchmc.org/navigation/termsofuse.jsp 
+
+This vignette shows the use of scToppR within a differential expression workflow. Using the 'airway' dataset, we'll perform a quick differential expression analysis using DESeq2. With the list of differentially expressed genes, we can easily use scToppR.
+
+# Installation
+
+```{r installation, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("scToppR")  
+```
+
+
+# Load Data
 As an introduction, this vignette will work with the FindAllMarkers output from Seurat's PBMC 3k clustering tutorial: [https://satijalab.org/seurat/articles/pbmc3k_tutorial.html](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html)
 
 You can follow that tutorial and get the markers file from this line:
@@ -31,8 +52,18 @@ head(pbmc.markers)
 ```
 
 
-With this data we can run the function `toppFun` to get results from ToppGene.
+With this data we can run the function `toppFun` to get results from ToppGene. The toppFun function can accept three different data formats:
 
+- A vector of gene symbols `type = "marker_list"`
+This is simply a list of gene symbols, without any additional information.
+
+- A data frame of cluster marker genes `type = "marker_df"`
+This is a dataframe where each column is a different cluster or celltype, and each row contains marker genes for that cluster.
+
+- A data frame of differentially expressed genes `type = "degs"`
+This is a typical output from a differential expression analysis such as DESeq2, containing gene symbols and statistics including p values and log fold changes. If the dataframe has a cluster or celltype column, the function can run ToppGene analysis for each cluster separately.
+
+The pbmc.markers data is in the "degs" format, so we will set `type = "degs"` in the toppFun function. We will also need to specify the relevant columns for clusters, genes, p values, and log fold changes:
 ```{r toppFun_1}
 toppData <- toppFun(input_data = pbmc.markers,
                     type = "degs",
@@ -44,7 +75,7 @@ toppData <- toppFun(input_data = pbmc.markers,
 
 ```
 
-Here it is important to tell toppFun the names of the relevant columns for clusters and genes. Additionally, you can run toppFun on all ToppGene categories by setting topp_categories to NULL. You may also provide 1 or more specific categories as a list. To see all ToppGene categories, you can also use the function get_ToppCats():
+Additionally, you can run toppFun on all ToppGene categories by setting topp_categories to NULL. You may also provide 1 or more specific categories as a list. To see all ToppGene categories, you can also use the function get_ToppCats():
 
 ```{r topp_cats}
 get_ToppCats()
@@ -64,7 +95,9 @@ head(toppData)
 scToppR can automatically create DotPlots for each ToppGene category. Simply run:
 
 ```{r toppPlot_1}
-plots <- toppPlot(toppData, category = "GeneOntologyMolecularFunction", clusters = NULL)
+plots <- toppPlot(toppData, 
+                  category = "GeneOntologyMolecularFunction", 
+                  clusters = NULL)
 plots[1]
 ```
 
@@ -84,7 +117,8 @@ This function also has a save parameter, which will automatically save plots, wh
 scToppR will also automatically save the results of the ToppGene query. By default it will save separate files for each cluster. To save as one large file, set the parameter `split = FALSE`. It will also save all files as Excel spreadsheets, but this can be changed using the `format` parameter--it must be one of `c("xlsx", "csv", "tsv")`.
 
 ```{r save}
-toppSave(toppData, filename = "PBMC", split = TRUE, format = "xslx")
+tmpdir <- tempdir()
+toppSave(toppData, filename = "PBMC", save_dir = tmpdir, split = TRUE, format = "xlsx")
 ```
 
 ```{r sessionInfo}

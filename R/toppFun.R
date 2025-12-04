@@ -415,6 +415,14 @@ toppSave <- function (toppData,
   if (is.null(save_dir)) {
     stop("Please specify a `save_dir` to save the file(s)")
   }
+  
+  # Create directory if it doesn't exist
+  if (!dir.exists(save_dir)) {
+    dir.create(save_dir, recursive = TRUE)
+    if (isTRUE(verbose)) {
+      message("Created directory: ", save_dir)
+    }
+  }
   if (!(format %in% c("xlsx", "csv", "tsv"))) {
     stop("Please select one of c('xlsx', 'csv', 'tsv') for format")
   }
