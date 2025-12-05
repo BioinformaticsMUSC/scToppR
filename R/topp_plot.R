@@ -82,9 +82,9 @@
 #' @importFrom patchwork wrap_plots plot_annotation
 #' @importFrom utils head
 #' @examples
-#' data("toppData")
+#' data("toppdata.pbmc")
 
-#' toppPlot(toppData,
+#' toppPlot(toppdata.pbmc,
 #'     category = "GeneOntologyMolecularFunction",
 #'     clusters = 0,
 #'     save = FALSE
@@ -265,8 +265,8 @@ toppPlot <- function(toppData,
 #' @importFrom forcats fct_reorder
 #' @importFrom viridis scale_color_viridis
 #' @examples
-#' data("toppData")
-#' toppBalloon(toppData, balloons = 3, save = FALSE)
+#' data("toppdata.pbmc")
+#' toppBalloon(toppdata.pbmc, balloons = 3, save = FALSE)
 #'
 #' @export
 toppBalloon <- function(toppData,

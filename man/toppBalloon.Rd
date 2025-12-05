@@ -45,7 +45,7 @@ ggplot
 Create a balloon plot from toppdata results
 }
 \examples{
-data("toppData")
-toppBalloon(toppData, balloons = 3, save = FALSE)
+data("toppdata.pbmc")
+toppBalloon(toppdata.pbmc, balloons = 3, save = FALSE)
 
 }

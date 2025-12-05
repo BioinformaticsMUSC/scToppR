@@ -14,13 +14,16 @@
 #'   \item{gene}{gene name}
 #' }
 #' @usage data("pbmc.markers")
-#' @source \url{https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz}
+#' @source 10X Genomics PBMC 3k dataset. Available from 
+#'   \url{https://www.10xgenomics.com/resources/datasets/}. 
+#'   Analysis following Seurat PBMC tutorial: 
+#'   \url{https://satijalab.org/seurat/articles/pbmc3k_tutorial.html}
 #'
 "pbmc.markers"
 
 #' toppData example
 #'
-#' A dataframe of of sample toppData results
+#' A dataframe of of sample toppData results created from the pbmc.markers dataset using the toppFun() function
 #'
 #' @format A dataframe with 8,550 rows and 14 columns
 #' \describe{
@@ -39,10 +42,18 @@
 #'   \item{URL}{ToppGene associated URL}
 #'   \item{Cluster}{cell group name}
 #' }
-#' @usage data("toppData")
+#' @usage data("toppdata.pbmc")
 #' @source \url{https://toppgene.cchmc.org}
+#' @source Generated using ToppGene API (\url{https://toppgene.cchmc.org/}).
+#'   Chen J, Bardes EE, Aronow BJ, Jegga AG. ToppGene Suite for gene list 
+#'   enrichment analysis and candidate gene prioritization. Nucleic Acids Res. 
+#'   2009;37(Web Server issue):W305-11. doi: 10.1093/nar/gkp427.
+#' @source 10X Genomics PBMC 3k dataset. Available from 
+#'   \url{https://www.10xgenomics.com/resources/datasets/}. 
+#'   Analysis following Seurat PBMC tutorial: 
+#'   \url{https://satijalab.org/seurat/articles/pbmc3k_tutorial.html}
 #'
-"toppData"
+"toppdata.pbmc"
 #' IFNB DE results
 #'
 #' A dataframe of differentially expressed genes generated using the
@@ -64,6 +75,37 @@
 #'
 "ifnb.de"
 
+#' toppData example for ifnb.de
+#'
+#' A dataframe of of sample toppData results created from the ifnb.de dataset using the toppFun() function
+#'
+#' @format A dataframe with 12,227 rows and 14 columns
+#' \describe{
+#'   \item{Category}{ToppGene category}
+#'   \item{ID}{ToppGene Term ID}
+#'   \item{Name}{ToppGene Term Name}
+#'   \item{PValue}{P value}
+#'   \item{QValueFDRBH}{adjusted p-value (FDR)}
+#'   \item{QValueFDRBY}{adjusted p-value (BY)}
+#'   \item{QValueBonferroni}{adjusted p-value (Bonferroni)}
+#'   \item{TotalGenes}{Total genes in background}
+#'   \item{GenesInTerm}{Genes in ToppGene Term}
+#'   \item{GenesInQuery}{Genes in submitted query}
+#'   \item{GenesInTermQuery}{Intersection of genes in Term and in Query}
+#'   \item{Source}{ToppGene result source}
+#'   \item{URL}{ToppGene associated URL}
+#'   \item{Cluster}{cell group name}
+#' }
+#' @usage data("toppdata.ifnb")
+#' @source Generated using ToppGene API (\url{https://toppgene.cchmc.org/}).
+#'   Chen J, Bardes EE, Aronow BJ, Jegga AG. ToppGene Suite for gene list 
+#'   enrichment analysis and candidate gene prioritization. Nucleic Acids Res. 
+#'   2009;37(Web Server issue):W305-11. doi: 10.1093/nar/gkp427.
+#' @source \url{https://toppgene.cchmc.org}
+#' @source Kang HM, Subramaniam M, Targ S, et al. Multiplexed droplet 
+#'   single-cell RNA-sequencing using natural genetic variation. 
+#'   Nat Biotechnol. 2018;36(1):89-94. doi:10.1038/nbt.4042
+"toppdata.ifnb"
 #' IFNB Marker DF
 #'
 #' A dataframe of 100 top markers for each class in 'seurat_annotations' column
@@ -89,7 +131,9 @@
 #' }
 #' @usage data("ifnb.markers.df")
 #' @source \url{https://www.nature.com/articles/nbt.4042}
-#'
+#' @source Kang HM, Subramaniam M, Targ S, et al. Multiplexed droplet 
+#'   single-cell RNA-sequencing using natural genetic variation. 
+#'   Nat Biotechnol. 2018;36(1):89-94. doi:10.1038/nbt.4042
 "ifnb.markers.df"
 
 #' IFNB Marker DF
@@ -104,5 +148,45 @@
 #' }
 #' @usage data("ifnb.markers.list.CD8T")
 #' @source \url{https://www.nature.com/articles/nbt.4042}
+#' @source Kang HM, Subramaniam M, Targ S, et al. Multiplexed droplet 
+#'   single-cell RNA-sequencing using natural genetic variation. 
+#'   Nat Biotechnol. 2018;36(1):89-94. doi:10.1038/nbt.4042
 #'
 "ifnb.markers.list.CD8T"
+
+#' toppData example using the airway dataset results
+#'
+#' A dataframe of of sample toppData results created from the ifnb.de dataset using the toppFun() function
+#'
+#' @format A dataframe with 902 rows and 14 columns
+#' \describe{
+#'   \item{Category}{ToppGene category}
+#'   \item{ID}{ToppGene Term ID}
+#'   \item{Name}{ToppGene Term Name}
+#'   \item{PValue}{P value}
+#'   \item{QValueFDRBH}{adjusted p-value (FDR)}
+#'   \item{QValueFDRBY}{adjusted p-value (BY)}
+#'   \item{QValueBonferroni}{adjusted p-value (Bonferroni)}
+#'   \item{TotalGenes}{Total genes in background}
+#'   \item{GenesInTerm}{Genes in ToppGene Term}
+#'   \item{GenesInQuery}{Genes in submitted query}
+#'   \item{GenesInTermQuery}{Intersection of genes in Term and in Query}
+#'   \item{Source}{ToppGene result source}
+#'   \item{URL}{ToppGene associated URL}
+#'   \item{Cluster}{cell group name}
+#' }
+#' @usage data("toppdata.airway")
+#' @source \url{https://toppgene.cchmc.org}
+#' @source Generated using ToppGene API (\url{https://toppgene.cchmc.org/}).
+#'   Chen J, Bardes EE, Aronow BJ, Jegga AG. ToppGene Suite for gene list 
+#'   enrichment analysis and candidate gene prioritization. Nucleic Acids Res. 
+#'   2009;37(Web Server issue):W305-11. doi: 10.1093/nar/gkp427.
+#' @source Himes, E. B, Jiang, X., Wagner, P., Hu, R., Wang, Q., 
+#' Klanderman, B., Whitaker, M. R, Duan, Q., Lasky-Su, J., Nikolos, 
+#' C., Jester, W., Johnson, M., Panettieri, A. R, Tantisira, G. K, Weiss, 
+#' T. S, Lu, Q. (2014). “RNA-Seq Transcriptome Profiling Identifies CRISPLD2 
+#' as a Glucocorticoid Responsive Gene that Modulates Cytokine Function in 
+#' Airway Smooth Muscle Cells.” PLoS ONE, 9(6), e99625. http://www.ncbi.nlm.nih.gov/pubmed/24926665. 
+#' @source \url{https://www.bioconductor.org/packages/release/data/experiment/html/airway.html}
+#'
+"toppdata.airway"

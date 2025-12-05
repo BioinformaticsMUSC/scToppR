@@ -1,17 +1,8 @@
 ### test for toppPlot
 test_that("toppPlot works", {
-    data("ifnb.de")
-    toppData <- toppFun(ifnb.de,
-        type = "degs",
-        topp_categories = "GeneOntologyMolecularFunction",
-        cluster_col = "celltype",
-        gene_col = "gene",
-        logFC_col = "avg_log2FC",
-        p_val_col = "p_val_adj",
-        verbose = FALSE
-    )
+    data("toppdata.pbmc")
 
-    dotplot <- toppPlot(toppData,
+    dotplot <- toppPlot(toppdata.pbmc,
         category = "GeneOntologyMolecularFunction",
         clusters = 0,
         save = FALSE
@@ -22,18 +13,9 @@ test_that("toppPlot works", {
 })
 
 test_that("toppPlot multiple clusters works", {
-    data("ifnb.de")
-    toppData <- toppFun(ifnb.de,
-        type = "degs",
-        topp_categories = "GeneOntologyMolecularFunction",
-        cluster_col = "celltype",
-        gene_col = "gene",
-        logFC_col = "avg_log2FC",
-        p_val_col = "p_val_adj",
-        verbose = FALSE
-    )
+    data("toppdata.pbmc")
 
-    dotplot_list <- toppPlot(toppData,
+    dotplot_list <- toppPlot(toppdata.pbmc,
         category = "GeneOntologyMolecularFunction",
         clusters = c("CD4T", "CD8T"),
         save = FALSE
@@ -46,18 +28,9 @@ test_that("toppPlot multiple clusters works", {
 })
 
 test_that("toppBalloon works", {
-    data("ifnb.de")
-    toppData <- toppFun(ifnb.de,
-        type = "degs",
-        topp_categories = "GeneOntologyMolecularFunction",
-        cluster_col = "celltype",
-        gene_col = "gene",
-        logFC_col = "avg_log2FC",
-        p_val_col = "p_val_adj",
-        verbose = FALSE
-    )
+    data("toppdata.pbmc")
 
-    balloonplot <- toppBalloon(toppData,
+    balloonplot <- toppBalloon(toppdata.pbmc,
         categories = "GeneOntologyMolecularFunction",
         save = FALSE
     )

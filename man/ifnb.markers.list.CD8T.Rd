@@ -12,6 +12,10 @@ A character vector with 100 genes
 }
 \source{
 \url{https://www.nature.com/articles/nbt.4042}
+
+Kang HM, Subramaniam M, Targ S, et al. Multiplexed droplet
+single-cell RNA-sequencing using natural genetic variation.
+Nat Biotechnol. 2018;36(1):89-94. doi:10.1038/nbt.4042
 }
 \usage{
 data("ifnb.markers.list.CD8T")

@@ -17,7 +17,10 @@ A dataframe with 11,629 rows and 7 columns
 }
 }
 \source{
-\url{https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz}
+10X Genomics PBMC 3k dataset. Available from
+\url{https://www.10xgenomics.com/resources/datasets/}.
+Analysis following Seurat PBMC tutorial:
+\url{https://satijalab.org/seurat/articles/pbmc3k_tutorial.html}
 }
 \usage{
 data("pbmc.markers")

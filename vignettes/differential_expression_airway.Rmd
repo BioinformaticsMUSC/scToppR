@@ -67,33 +67,39 @@ res$cluster <- "cluster0"
 # Using scToppR with Differential Expression Results
 With these results, we will use scToppR to querry the ToppGene database for all categories for each cluster using the toppFun() function. This function requires users to specify the columns in their dataset.
 
-```{r toppFun}
-toppData <- toppFun(res,
+```{r toppFun, eval=FALSE}
+# This is how you would run the analysis with live data (requires internet)
+toppdata.airway <- toppFun(res,
     type = "degs",
     gene_col = "gene",
     cluster_col = "cluster",
     p_val_col = "padj",
     logFC_col = "log2FoldChange"
 )
-head(toppData)
+```
+
+```{r load_cached}
+# For this vignette, we'll use pre-computed results
+data("toppdata.airway")
+head(toppdata.airway)
 ```
 
 As the code reminds you, the use of this data must be done so in accordance with ToppGene's Terms of Use. For more information, please visit: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 
 # Visualizing ToppGene Results
-The toppData dataframe includes all results from toppGene. We can use this dataframe to quickly generate pathway analysis plots using the toppPlot() function. The function can be used to generate a single plot, for example:
+The toppData dataframe (whether from live API call or cached data) includes all results from ToppGene. We can use this dataframe to quickly generate pathway analysis plots using the toppPlot() function. The function can be used to generate a single plot, for example:
 
 ```{r plot1, fig.dim=c(8,8)}
-toppPlot(toppData,
+toppPlot(toppdata.airway,
     category = "GeneOntologyMolecularFunction",
-    clusters = "cluster0"
+    clusters = "cluster0"  
 )
 ```
 
 The toppPlot() function can also create a plot for each cluster for a specified category; simply assign the parameter `clusters` to NULL. In this case, the function will return a list of plots.
 
 ```{r plot_list, fig.dim=c(8,8)}
-plot_list <- toppPlot(toppData,
+plot_list <- toppPlot(toppdata.airway,
     category = "GeneOntologyMolecularFunction",
     clusters = NULL
 )
@@ -108,7 +114,7 @@ All of these plots can also be automatically saved by the toppPlot() function. T
 The cluster/celltype name will be automatically added to the filename prior to saving.
 
 ```{r plot_save, eval=FALSE}
-plot_list <- toppPlot(toppData,
+plot_list <- toppPlot(toppdata.airway,
     category = "GeneOntologyMolecularFunction",
     clusters = NULL,
     save = TRUE,
@@ -120,7 +126,7 @@ plot_list <- toppPlot(toppData,
 scToppR also uses the toppBalloon() function to create a balloon plot, allowing researchers to quickly compare the top terms from the ToppGene results.
 
 ```{r plot_balloon, fig.dim=c(8,5)}
-toppBalloon(toppData,
+toppBalloon(toppdata.airway,
     categories = "GeneOntologyBiologicalProcess"
 )
 ```
@@ -130,7 +136,7 @@ Some advantages of using scToppR in a pipeline include access to the other categ
 For example, a quick look at the toppBalloon plot for Pathway shows a distinction with the Dendritic Cells compared to others:
 
 ```{r plot_balloon2, fig.dim=c(8,5)}
-toppBalloon(toppData,
+toppBalloon(toppdata.airway,
     categories = "Pathway"
 )
 ```
@@ -138,7 +144,7 @@ toppBalloon(toppData,
 The Pubmed category also provides researchers with other papers exploring similar data:
 
 ```{r plot_balloon3, fig.dim=c(8,5)}
-toppBalloon(toppData,
+toppBalloon(toppdata.airway,
     categories = "Pubmed"
 )
 ```
@@ -147,7 +153,7 @@ toppBalloon(toppData,
 To save toppData results, scToppR also includes a toppSave() function. This function can save the toppData results as a single file, or it can split the data into different clusters/celltypes and save each individually. To do so, set `save = TRUE` in the function call. The function saves the files as Excel spreadsheets by default, but this can be changed to .csv or .tsv files using the `format` parameter.
 
 ```{r save, eval=FALSE}
-toppSave(toppData,
+toppSave(toppdata.airway,
     filename = "airway_toppData",
     save_dir = "./toppData_results",
     split = TRUE,

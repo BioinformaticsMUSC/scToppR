@@ -62,8 +62,8 @@ Create a dotplot from toppdata results
 NEW: this accepts only 1 category
 }
 \examples{
-data("toppData")
-toppPlot(toppData,
+data("toppdata.pbmc")
+toppPlot(toppdata.pbmc,
     category = "GeneOntologyMolecularFunction",
     clusters = 0,
     save = FALSE

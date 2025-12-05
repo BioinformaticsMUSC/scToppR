@@ -25,7 +25,7 @@ scToppR is a package that allows seamless, workflow-based interaction with ToppG
 The use of data from ToppGene is governed by their Terms of Use:
 https://toppgene.cchmc.org/navigation/termsofuse.jsp 
 
-This vignette shows the use of scToppR within a differential expression workflow. Using the 'airway' dataset, we'll perform a quick differential expression analysis using DESeq2. With the list of differentially expressed genes, we can easily use scToppR.
+This vignette demonstrates the use of scToppR within a differential expression workflow. We show the complete workflow from differential expression results to pathway analysis and visualization. While the examples show how to make live API calls to ToppGene, this vignette uses pre-computed results to ensure reproducibility and avoid dependency on internet connectivity.
 
 # Installation
 
@@ -65,8 +65,10 @@ This is a dataframe where each column is a different cluster or celltype, and ea
 This is a typical output from a differential expression analysis such as DESeq2, containing gene symbols and statistics including p values and log fold changes. If the dataframe has a cluster or celltype column, the function can run ToppGene analysis for each cluster separately.
 
 The pbmc.markers data is in the "degs" format, so we will set `type = "degs"` in the toppFun function. We will also need to specify the relevant columns for clusters, genes, p values, and log fold changes:
-```{r toppFun_1}
-toppData <- toppFun(
+
+```{r toppFun_1, eval=FALSE}
+# This is how you would run the analysis with live data (requires internet)
+toppdata.pbmc <- toppFun(
     input_data = pbmc.markers,
     type = "degs",
     topp_categories = NULL,
@@ -77,6 +79,14 @@ toppData <- toppFun(
 )
 ```
 
+For this vignette, we'll use the pre-computed results that are included with the package:
+
+```{r load_cached_data}
+# Load pre-computed toppFun results
+data("toppdata.pbmc")
+head(toppdata.pbmc)
+```
+
 Additionally, you can run toppFun on all ToppGene categories by setting topp_categories to NULL. You may also provide 1 or more specific categories as a list. To see all ToppGene categories, you can also use the function get_ToppCats():
 
 ```{r topp_cats}
@@ -85,10 +95,14 @@ get_ToppCats()
 
 You can also set additional parameters in the toppFun function, please check the documentation for more information.
 
-The results of toppFun are organized into a data frame as such:
+The results of toppFun (whether from a live API call or loaded from cached data) are organized into a data frame with the following structure:
 
-```{r toppData_out}
-head(toppData)
+```{r toppData_structure}
+# Examine the structure of the results
+str(toppdata.pbmc)
+cat("Number of enriched terms:", nrow(toppdata.pbmc), "\n")
+cat("Categories analyzed:", length(unique(toppdata.pbmc$Category)), "\n")
+cat("Clusters analyzed:", length(unique(toppdata.pbmc$Cluster)), "\n")
 ```
 
 ## Plotting
@@ -96,7 +110,7 @@ head(toppData)
 scToppR can automatically create DotPlots for each ToppGene category. Simply run:
 
 ```{r toppPlot_1}
-plots <- toppPlot(toppData,
+plots <- toppPlot(toppdata.pbmc,
     category = "GeneOntologyMolecularFunction",
     clusters = NULL
 )
@@ -108,7 +122,7 @@ This will create a list of plots for all clusters in one specific category. Here
 scToppR can also create balloon plots showing overlapping terms between all clusters.
 
 ```{r toppBalloon}
-toppBalloon(toppData, categories = "GeneOntologyMolecularFunction")
+toppBalloon(toppdata.pbmc, categories = "GeneOntologyMolecularFunction")
 ```
 
 This function also has a save parameter, which will automatically save plots, which is helpful if multiple categories are visualized.
@@ -120,7 +134,7 @@ scToppR will also automatically save the results of the ToppGene query. By defau
 
 ```{r save}
 tmpdir <- tempdir()
-toppSave(toppData, filename = "PBMC", save_dir = tmpdir, split = TRUE, format = "xlsx")
+toppSave(toppdata.pbmc, filename = "PBMC", save_dir = tmpdir, split = TRUE, format = "xlsx")
 ```
 
 ```{r sessionInfo}
