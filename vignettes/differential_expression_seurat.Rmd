@@ -57,7 +57,8 @@ ifnb.de.filtered <- ifnb.de |>
 With these results, we will use scToppR to querry the ToppGene database for all categories for each cluster using the toppFun() function. This function requires users to specify the columns in their dataset.
 
 ```{r toppFun}
-toppData <- toppFun(ifnb.de.filtered,
+toppData <- toppFun(input_data = ifnb.de.filtered,
+    type = "degs",
     gene_col = "gene",
     cluster_col = "celltype",
     p_val_col = "p_val_adj",

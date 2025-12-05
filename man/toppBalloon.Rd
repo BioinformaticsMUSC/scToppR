@@ -48,5 +48,4 @@ Create a balloon plot from toppdata results
 data("toppData")
 toppBalloon(toppData, balloons = 3, save = FALSE)
 
-
 }
