@@ -156,6 +156,9 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
             if (!(col %in% c("rank", "X"))) {
                 gene_list <- gene_data[[col]]
 
+                if (key_type != "ENTREZ") {
+                            gene_list <- get_Entrez(gene_list)
+                }
                 if (sum(!(is.na(gene_list))) >= min_genes) {
                     if (verbose) {
                         message("Working on cluster:", col, "\n")
@@ -164,7 +167,6 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                     d <- .get_topp(
                         gene_list = gene_list,
                         topp_categories = topp_categories,
-                        key_type = "SYMBOL",
                         pval_cutoff = pval_cutoff,
                         min_genes = min_genes,
                         max_genes = max_genes,
@@ -189,16 +191,17 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                 col_dir <- paste(col, fc_direction, sep = "_")
                 if (!(col %in% c("rank", "X"))) {
                     gene_list <- gene_data_split[[fc_direction]][[col]]
-
+                    if (key_type != "ENTREZ") {
+                            gene_list <- get_Entrez(gene_list)
+                    }
                     if (sum(!(is.na(gene_list))) >= min_genes) {
                         if (verbose) {
-                            message("Working on cluster:", col, fc_direction, "\n")
+                            message("Working on cluster: ", col, " ",fc_direction, "\n")
                         }
-
+                        
                         d <- .get_topp(
                             gene_list = gene_list,
                             topp_categories = topp_categories,
-                            key_type = "SYMBOL",
                             pval_cutoff = pval_cutoff,
                             min_genes = min_genes,
                             max_genes = max_genes,
@@ -208,8 +211,8 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
 
                         if (nrow(d) == 0) {
                             missing_clusters <- append(missing_clusters, col_dir)
-                        } else if (length(names(gene_data_split[[fc_direction]])) == 1) {
-                            big_df <- rbind(big_df, d)
+                        # } else if (length(names(gene_data_split[[fc_direction]])) == 1) {
+                        #     big_df <- rbind(big_df, d)
                         } else {
                             d[["Cluster"]] <- col
                             d[["Direction"]] <- fc_direction
@@ -266,6 +269,7 @@ get_Entrez <- function(genes) {
                           genes_submit_cutoff = 1000) {
     # parse columns - tries to find columns if differ from the default TODO
 
+
     # Make a list of lists - each sub list has all of the genes (up to num_genes if specified) of the filtered data
     marker_list <- list()
 
@@ -277,9 +281,6 @@ get_Entrez <- function(genes) {
             all_cl_markers <- all_cl_markers |>
                 dplyr::filter(abs(!!as.name(logFC_col)) > fc_cutoff) |>
                 dplyr::arrange(-abs(!!as.name(logFC_col))) |>
-                # dplyr::mutate(direction = dplyr::case_when(!!as.name(logFC_col) > 0 ~ "up",
-                #                                            !!as.name(logFC_col) < 0 ~ "down",
-                #                                            .default = "nc")) |>
                 dplyr::select(!!as.name(gene_col))
         } else if (fc_filter == "UPREG") {
             all_cl_markers <- all_cl_markers |>
@@ -312,23 +313,13 @@ get_Entrez <- function(genes) {
 }
 
 .get_topp <- function(gene_list,
-                      key_type,
                       topp_categories,
                       max_results = 10,
                       min_genes = 5,
                       max_genes = 1500,
                       pval_cutoff = 0.05,
                       correction = "FDR") {
-    # convert gene names if necessary
-    if (key_type != "ENTREZ") {
-        new_gene_list <- get_Entrez(gene_list)
-    } else {
-        new_gene_list <- gene_list
-    }
-
-    # create payload for POST request
-    payload <- list()
-    payload[["Genes"]] <- new_gene_list
+    
     category_list <- list()
     for (i in seq_along(topp_categories)) {
         cat_dict <- list(
@@ -346,7 +337,7 @@ get_Entrez <- function(genes) {
     url <- "https://toppgene.cchmc.org/API/enrich"
     req <- request(url)
     resp <- req |>
-        httr2::req_body_json(list(Genes = new_gene_list, Categories = category_list)) |>
+        httr2::req_body_json(list(Genes = gene_list, Categories = category_list)) |>
         httr2::req_perform()
 
     response_data <- httr2::resp_body_json(resp)[["Annotations"]]
