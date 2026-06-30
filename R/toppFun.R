@@ -293,6 +293,12 @@ get_Entrez <- function(genes) {
                 dplyr::arrange(!!as.name(logFC_col)) |>
                 dplyr::select(!!as.name(gene_col))
         }
+
+        if(all(is.na(all_cl_markers))){
+            message("\nInitial filtration leaves ", cl, " filtered to 0 genes (pval_cutoff: < ", pval_cutoff, ", fc_cutoff: > ", fc_cutoff, "), skipping ", cl, "'s ToppGene query...\n")
+            next
+        }
+
         if (!(is.null(num_genes))) {
             if (length(all_cl_markers[[gene_col]]) > num_genes) {
                 marker_list[[cl]] <- all_cl_markers[seq_len(num_genes), gene_col] |>
@@ -336,10 +342,16 @@ get_Entrez <- function(genes) {
     # send POST request
     url <- "https://toppgene.cchmc.org/API/enrich"
     req <- request(url)
-    resp <- req |>
-        httr2::req_body_json(list(Genes = gene_list, Categories = category_list)) |>
-        httr2::req_perform()
-
+    if(length(gene_list) == 1) {
+        resp <- req |>
+            httr2::req_body_json(list(Genes = list(gene_list), Categories = category_list)) |>
+            httr2::req_perform()
+    }
+    else {
+        resp <- req |>
+            httr2::req_body_json(list(Genes = gene_list, Categories = category_list)) |>
+            httr2::req_perform()
+    }
     response_data <- httr2::resp_body_json(resp)[["Annotations"]]
     keepers <- c(
         "Category", "ID", "Name", "PValue", "QValueFDRBH", "QValueFDRBY", "QValueBonferroni",
