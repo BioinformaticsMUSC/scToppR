@@ -10,13 +10,14 @@ toppBalloon(
   balloons = 3,
   x_axis_text_size = 6,
   cluster_col = "Cluster",
-  filename = "toppBalloon",
+  file_prefix = NULL,
   save = FALSE,
   save_dir = tempdir(),
   height = 6,
   width = 8,
   slot_name = "toppData",
-  ...
+  ...,
+  filename = NULL
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ toppBalloon(
 
 \item{cluster_col}{The column name for clusters (default: "Cluster")}
 
-\item{filename}{Filename of the saved balloon plot}
+\item{file_prefix}{Filename prefix for saved balloon plots (defaults to \code{"toppBalloon"})}
 
 \item{save}{Save the balloon plot if TRUE}
 
@@ -43,6 +44,8 @@ toppBalloon(
 \item{slot_name}{For SE/SCE objects, the metadata slot name containing toppData (default: "toppData")}
 
 \item{...}{Additional parameters for future use}
+
+\item{filename}{Legacy compatibility alias for \code{file_prefix}}
 }
 \value{
 ggplot object or list of ggplot objects

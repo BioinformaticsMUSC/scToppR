@@ -7,8 +7,11 @@ globalVariables(c(
     "Name", 
     "QValueFDRBH", 
     "geneRatio", 
-    "genes_submit_cutoff", 
-    "nlog10_fdr"
+    "nlog10_fdr",
+    "logFC",
+    "neglog_p",
+    "Highlight",
+    "gene"
 ))
 
 # print a message warning users that data from ToppGene must be used according

@@ -6,7 +6,14 @@
 #'
 #' @details The use of data from ToppGene is governed by their Terms of Use: https://toppgene.cchmc.org/navigation/termsofuse.jsp
 #'
-#' @param input_data A vector of markers or dataframe with columns as cluster labels
+#' @details When `input_data` is a SummarizedExperiment created by [toppSE()], the
+#' differential expression results and column mapping stored in the object are used,
+#' so none of the `*_col` arguments are needed. The enrichment results are returned
+#' inside the object (see [toppData()] to retrieve them as a data.frame). Any
+#' previous results stored in the object are replaced.
+#'
+#' @param input_data A vector of markers or dataframe with columns as cluster labels,
+#' or a SummarizedExperiment created by [toppSE()]
 #' @param type One of c("degs", "marker_list", or "marker_df). If "degs" is selected,
 #' the input_data is assumed to be a data.frame with logfoldchange, pvalue, and gene name columns.
 #' If "marker_list" is selected, input_data is assumed to be a list of genes with no other stats,
@@ -20,7 +27,8 @@
 #' @param p_val_col Column name for the p-value or adjusted p-value (preferred)
 #' @param direction_mode One of c("all", "split"). Whether to use all genes in the pathway analysis, or to split by up and down regulated genes
 #' @param num_genes Number of genes per group to use for toppGene query
-#' @param key_type Gene name format
+#' @param key_type Gene name format. For SummarizedExperiment input, `NULL` uses the
+#' format recorded by [toppSE()]
 #' @param pval_cutoff (adjusted) P-value cutoff for filtering differentially expressed genes
 #' @param fc_filter Include "ALL" genes, or only "UPREG" or "DOWNREG" for each cluster
 #' @param fc_cutoff Avg log fold change cutoff for filtering differentially expressed genes
@@ -30,10 +38,12 @@
 #' @param max_results Maximum number of results per cluster
 #' @param correction P-value correction method ("FDR" is "BH")
 #' @param verbose Verbosity setting, TRUE or FALSE
+#' @param ... Arguments passed to methods
 #' @importFrom stringr str_glue str_c str_subset
 #' @importFrom dplyr filter arrange select
 #' @importFrom httr2 request req_body_json req_perform resp_body_json
-#' @return data.frame
+#' @return A data.frame, or for SummarizedExperiment input, the SummarizedExperiment
+#' with the enrichment results stored in its assays
 #' @examples
 #' data("ifnb.de")
 #' toppData <- toppFun(ifnb.de,
@@ -43,8 +53,25 @@
 #'     p_val_col = "p_val_adj",
 #'     logFC_col = "avg_log2FC"
 #' )
+#'
+#' \donttest{
+#' # With a SummarizedExperiment container
+#' se <- toppSE(ifnb.de,
+#'     cluster_col = "celltype",
+#'     gene_col = "gene",
+#'     p_val_col = "p_val_adj",
+#'     logFC_col = "avg_log2FC"
+#' )
+#' se <- toppFun(se)
+#' }
 #' @export
-toppFun <- function(input_data,
+toppFun <- function(input_data, ...) {
+    UseMethod("toppFun")
+}
+
+#' @rdname toppFun
+#' @export
+toppFun.default <- function(input_data,
                     type = "degs",
                     topp_categories = NULL,
                     cluster_col = "cluster",
@@ -62,7 +89,8 @@ toppFun <- function(input_data,
                     min_genes = 2,
                     max_genes = 1500,
                     max_results = 50,
-                    verbose = TRUE) {
+                    verbose = TRUE,
+                    ...) {
     if (!(type %in% c("degs", "marker_df", "marker_list"))) {
         stop("Please ensure the parameter `type` is one of: degs, marker_df, or marker_list.")
     }
@@ -100,7 +128,6 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                 num_genes = num_genes,
                 pval_cutoff = pval_cutoff,
                 fc_cutoff = fc_cutoff,
-                genes_submit_cutoff = genes_submit_cutoff,
                 fc_filter = fc_filter
             )
         } else if (direction_mode == "split") {
@@ -115,7 +142,6 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                 num_genes = num_genes,
                 pval_cutoff = pval_cutoff,
                 fc_cutoff = fc_cutoff,
-                genes_submit_cutoff = genes_submit_cutoff,
                 fc_filter = fc_filter
             )
             input_data_down <- input_data |> dplyr::filter(abs(!!as.name(logFC_col)) > fc_cutoff & !!as.name(logFC_col) < 0)
@@ -128,7 +154,6 @@ Citations: https://toppgene.cchmc.org/help/publications.jsp"
                 num_genes = num_genes,
                 pval_cutoff = pval_cutoff,
                 fc_cutoff = fc_cutoff,
-                genes_submit_cutoff = genes_submit_cutoff,
                 fc_filter = fc_filter
             )
         }
@@ -265,8 +290,7 @@ get_Entrez <- function(genes) {
                           num_genes = 1000,
                           pval_cutoff = 0.5,
                           fc_cutoff = 0,
-                          fc_filter = "ALL",
-                          genes_submit_cutoff = 1000) {
+                          fc_filter = "ALL") {
     # parse columns - tries to find columns if differ from the default TODO
 
 
@@ -391,8 +415,9 @@ get_ToppCats <- function() {
 
 #' Save toppData results (optionally) split by celltype/cluster
 #'
-#' @param toppData Results from toppFun as a dataframe
-#' @param filename filename prefix for each split file
+#' @param toppData Results from toppFun as a dataframe, or a SummarizedExperiment created with [toppSE()]
+#' @param file_prefix Filename prefix for each output file
+#' @param filename Legacy compatibility alias for `file_prefix`
 #' @param save_dir the directory to save files
 #' @param split Boolean, whether to split the dataframe by celltype/cluster
 #' @param format Saved file format, one of c("xlsx", "csv", "tsv")
@@ -406,18 +431,25 @@ get_ToppCats <- function() {
 #' @examples
 #' data("toppdata.ifnb")
 #' toppSave(toppdata.ifnb, 
-#'     filename = "toppFun_results", 
+#'     file_prefix = "toppFun_results",
 #'     save_dir = tempdir(), 
 #'     split = TRUE, 
 #'     format = "xlsx")
 #' @export
 toppSave <- function(toppData,
-                     filename = "toppData_results",
+                     file_prefix = NULL,
                      save_dir = NULL,
                      split = TRUE,
                      format = "xlsx",
                      cluster_col = "Cluster",
-                     verbose = TRUE) {
+                     verbose = TRUE,
+                     filename = NULL) {
+    file_prefix <- .resolve_file_prefix(file_prefix, filename, "toppData_results")
+
+    if (inherits(toppData, "SummarizedExperiment")) {
+        toppData <- toppData(toppData)
+    }
+
     if (is.null(save_dir)) {
         stop("Please specify a `save_dir` to save the file(s)")
     }
@@ -434,26 +466,26 @@ toppSave <- function(toppData,
                 dplyr::filter(!!as.name(cluster_col) == clust)
             # Replace whitespace in cluster name for filename compatibility
             clust <- gsub("\\s+", "_", clust)
-            filename_with_cluster <- stringr::str_glue("{filename}_{clust}")
+            file_prefix_with_cluster <- stringr::str_glue("{file_prefix}_{clust}")
 
             if (format == "xlsx") {
                 .save_xlsx(
                     toppData = tmp_toppData,
-                    filename = filename_with_cluster,
+                    file_prefix = file_prefix_with_cluster,
                     save_dir = save_dir,
                     verbose = verbose
                 )
             } else if (format == "csv") {
                 .save_csv(
                     toppData = tmp_toppData,
-                    filename = filename_with_cluster,
+                    file_prefix = file_prefix_with_cluster,
                     save_dir = save_dir,
                     verbose = verbose
                 )
             } else if (format == "tsv") {
                 .save_tsv(
                     toppData = tmp_toppData,
-                    filename = filename_with_cluster,
+                    file_prefix = file_prefix_with_cluster,
                     save_dir = save_dir,
                     verbose = verbose
                 )
@@ -463,21 +495,21 @@ toppSave <- function(toppData,
         if (format == "xlsx") {
             .save_xlsx(
                 toppData = toppData,
-                filename = filename,
+                file_prefix = file_prefix,
                 save_dir = save_dir,
                 verbose = verbose
             )
         } else if (format == "csv") {
             .save_csv(
                 toppData = toppData,
-                filename = filename,
+                file_prefix = file_prefix,
                 save_dir = save_dir,
                 verbose = verbose
             )
         } else if (format == "tsv") {
             .save_tsv(
                 toppData = toppData,
-                filename = filename,
+                file_prefix = file_prefix,
                 save_dir = save_dir,
                 verbose = verbose
             )
@@ -485,13 +517,23 @@ toppSave <- function(toppData,
     }
 }
 
+.resolve_file_prefix <- function(file_prefix, filename, default) {
+    if (!is.null(file_prefix)) {
+        file_prefix
+    } else if (!is.null(filename)) {
+        filename
+    } else {
+        default
+    }
+}
+
 .save_xlsx <- function(
   toppData,
-  filename,
+  file_prefix,
   save_dir,
   verbose = TRUE
 ) {
-    save_filename <- stringr::str_glue("{filename %||% 'toppData_results'}.xlsx")
+    save_filename <- stringr::str_glue("{file_prefix}.xlsx")
     openxlsx::write.xlsx(toppData,
         file = file.path(save_dir, save_filename),
         colNames = TRUE,
@@ -507,11 +549,11 @@ toppSave <- function(toppData,
 
 .save_csv <- function(
   toppData,
-  filename,
+  file_prefix,
   save_dir,
   verbose = TRUE
 ) {
-    save_filename <- stringr::str_glue("{filename %||% 'toppData_results'}.csv")
+    save_filename <- stringr::str_glue("{file_prefix}.csv")
     utils::write.table(toppData,
         file = file.path(save_dir, save_filename),
         sep = ",",
@@ -526,11 +568,11 @@ toppSave <- function(toppData,
 
 .save_tsv <- function(
   toppData,
-  filename,
+  file_prefix,
   save_dir,
   verbose = TRUE
 ) {
-    save_filename <- stringr::str_glue("{filename %||% 'toppData_results'}.tsv")
+    save_filename <- stringr::str_glue("{file_prefix}.tsv")
     utils::write.table(toppData,
         file = file.path(save_dir, save_filename),
         sep = "\t",
@@ -602,7 +644,7 @@ addToppData <- function(sce,
     S4Vectors::metadata(sce)[[params_slot]] <- list(
       timestamp = Sys.time(),
       n_terms = nrow(toppData_results),
-      clusters = unique(toppData_results$cluster),
+      clusters = unique(toppData_results$Cluster),
       categories = unique(toppData_results$Category)
     )
     message("Added toppData results to metadata slot '", slot_name, "'")

@@ -37,7 +37,7 @@
   plot,
   category,
   save_dir,
-  file_prefix = "toppPlot",
+  file_prefix = NULL,
   width = 8,
   height = 6,
   verbose = TRUE
@@ -72,7 +72,8 @@
 #' @param save_dir Directory to save file
 #' @param width width of the saved file (inches)
 #' @param height height of the saved file (inches)
-#' @param file_prefix file prefix if saving the plot - the cluster name is also added automatically
+#' @param file_prefix Filename prefix for saved plots (defaults to `"toppPlot"`); cluster names are added automatically
+#' @param filename Legacy compatibility alias for `file_prefix`
 #' @param combine If TRUE and multiple clusters selected, return a patchwork object of all plots; if FALSE return list of plots
 #' @param ncols If patchwork element returned, number of columns for subplots
 #' @param y_axis_text_size Size of the Y axis text - for certain categories, it's helpful to decrease this
@@ -110,12 +111,13 @@ toppPlot <- function(toppData,
                      save_dir = tempdir(),
                      width = 8,
                      height = 6,
-                     file_prefix = "toppPlot",
+                     file_prefix = NULL,
                      combine = FALSE,
                      ncols = 2,
                      y_axis_text_size = 10,
                      slot_name = "toppData",
-                     ...){
+                     ...,
+                     filename = NULL){
   UseMethod("toppPlot")
 }
 
@@ -132,12 +134,15 @@ toppPlot.data.frame <- function(toppData,
                                  save_dir = tempdir(),
                                  width = 8,
                                  height = 6,
-                                 file_prefix = "toppPlot",
+                                 file_prefix = NULL,
                                  combine = FALSE,
                                  ncols = 2,
                                  y_axis_text_size = 10,
                                  slot_name = "toppData",
-                                 ...) {
+                                 ...,
+                                 filename = NULL) {
+  file_prefix <- .resolve_file_prefix(file_prefix, filename, "toppPlot")
+
   # check for correct columns
   test_cols <- c("Category", "Name", "PValue", "GenesInTerm", "GenesInQuery", "GenesInTermInQuery")
   for (t in test_cols) {
@@ -289,7 +294,8 @@ toppPlot.data.frame <- function(toppData,
 #' @param categories The topp categories to plot
 #' @param cluster_col The column name for clusters (default: "Cluster")
 #' @param balloons Number of balloons per group to plot
-#' @param filename Filename of the saved balloon plot
+#' @param file_prefix Filename prefix for saved balloon plots (defaults to `"toppBalloon"`)
+#' @param filename Legacy compatibility alias for `file_prefix`
 #' @param save Save the balloon plot if TRUE
 #' @param save_dir Directory to save the balloon plot
 #' @param height Height of the saved balloon plot
@@ -318,13 +324,14 @@ toppBalloon <- function(toppData,
                         balloons = 3,
                         x_axis_text_size = 6,
                         cluster_col = "Cluster",
-                        filename = "toppBalloon",
+                        file_prefix = NULL,
                         save = FALSE,
                         save_dir = tempdir(),
                         height = 6,
                         width = 8,
                         slot_name = "toppData",
-                        ...){
+                        ...,
+                        filename = NULL){
   UseMethod("toppBalloon")
 }
 
@@ -335,13 +342,16 @@ toppBalloon.data.frame <- function(toppData,
                                     balloons = 3,
                                     x_axis_text_size = 6,
                                     cluster_col = "Cluster",
-                                    filename = "toppBalloon",
+                                    file_prefix = NULL,
                                     save = FALSE,
                                     save_dir = tempdir(),
                                     height = 6,
                                     width = 8,
                                     slot_name = "toppData",
-                                    ...) {
+                                    ...,
+                                    filename = NULL) {
+  file_prefix <- .resolve_file_prefix(file_prefix, filename, "toppBalloon")
+
   # Check for empty data
   if (nrow(toppData) == 0) {
     warning("No data available to plot. toppData contains 0 rows.")
@@ -395,9 +405,10 @@ toppBalloon.data.frame <- function(toppData,
 
     # Save balloon plot if specified
     if (isTRUE(save)) {
-      plot_filename <- stringr::str_glue("{filename}_{current_category}.pdf")
-      ggplot2::ggsave(plot_filename, height = height, width = width)
-      message("File saved to:", plot_filename)
+      plot_filename <- stringr::str_glue("{file_prefix}_{current_category}.pdf")
+      plot_path <- file.path(save_dir, plot_filename)
+      ggplot2::ggsave(plot_path, height = height, width = width)
+      message("File saved to:", plot_path)
     }
   }
   if (length(balloon_list) == 1) {
@@ -420,12 +431,15 @@ toppPlot.SummarizedExperiment <- function(toppData,
                                            save_dir = tempdir(),
                                            width = 8,
                                            height = 6,
-                                           file_prefix = "toppPlot",
+                                           file_prefix = NULL,
                                            combine = FALSE,
                                            ncols = 2,
                                            y_axis_text_size = 10,
                                            slot_name = "toppData",
-                                           ...) {
+                                           ...,
+                                           filename = NULL) {
+  file_prefix <- .resolve_file_prefix(file_prefix, filename, "toppPlot")
+
   
   # Check if required packages are available
   if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
@@ -438,21 +452,8 @@ toppPlot.SummarizedExperiment <- function(toppData,
          "Please install it with: BiocManager::install('S4Vectors')")
   }
   
-  # Extract toppData from metadata
-  metadata_obj <- S4Vectors::metadata(toppData)
-  
-  if (!slot_name %in% names(metadata_obj)) {
-    stop("toppData not found in metadata slot '", slot_name, "'. ", 
-         "Available metadata slots: ", paste(names(metadata_obj), collapse = ", "), ". ",
-         "Use addToppData() to add results or specify correct slot_name.")
-  }
-  
-  extracted_data <- metadata_obj[[slot_name]]
-  
-  if (!is.data.frame(extracted_data)) {
-    stop("Data in metadata slot '", slot_name, "' is not a data.frame. ",
-         "Expected toppData results stored as data.frame.")
-  }
+  # Extract toppData from a toppSE object or the metadata slot
+  extracted_data <- toppData(toppData, slot_name = slot_name)
   
   # Check that category parameter is provided
   if (is.null(category)) {
@@ -485,13 +486,16 @@ toppBalloon.SummarizedExperiment <- function(toppData,
                                               balloons = 3,
                                               x_axis_text_size = 6,
                                               cluster_col = "Cluster",
-                                              filename = "toppBalloon",
+                                              file_prefix = NULL,
                                               save = FALSE,
                                               save_dir = tempdir(),
                                               height = 6,
                                               width = 8,
                                               slot_name = "toppData",
-                                              ...) {
+                                              ...,
+                                              filename = NULL) {
+  file_prefix <- .resolve_file_prefix(file_prefix, filename, "toppBalloon")
+
   
   # Check if required packages are available
   if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
@@ -504,21 +508,8 @@ toppBalloon.SummarizedExperiment <- function(toppData,
          "Please install it with: BiocManager::install('S4Vectors')")
   }
   
-  # Extract toppData from metadata
-  metadata_obj <- S4Vectors::metadata(toppData)
-  
-  if (!slot_name %in% names(metadata_obj)) {
-    stop("toppData not found in metadata slot '", slot_name, "'. ", 
-         "Available metadata slots: ", paste(names(metadata_obj), collapse = ", "), ". ",
-         "Use addToppData() to add results or specify correct slot_name.")
-  }
-  
-  extracted_data <- metadata_obj[[slot_name]]
-  
-  if (!is.data.frame(extracted_data)) {
-    stop("Data in metadata slot '", slot_name, "' is not a data.frame. ",
-         "Expected toppData results stored as data.frame.")
-  }
+  # Extract toppData from a toppSE object or the metadata slot
+  extracted_data <- toppData(toppData, slot_name = slot_name)
   
   # Call the data.frame method
   toppBalloon.data.frame(extracted_data,
@@ -526,7 +517,7 @@ toppBalloon.SummarizedExperiment <- function(toppData,
                          balloons = balloons,
                          x_axis_text_size = x_axis_text_size,
                          cluster_col = cluster_col,
-                         filename = filename,
+                         file_prefix = file_prefix,
                          save = save,
                          save_dir = save_dir,
                          height = height,
@@ -539,15 +530,17 @@ toppBalloon.SummarizedExperiment <- function(toppData,
 toppPlot.RangedSummarizedExperiment <- function(toppData, category = NULL, clusters = NULL, cluster_col = "Cluster", 
                                                 p_val_adj = "QValueFDRBH", p_val_display = "FDR_BH", num_terms = 10,
                                                 save = FALSE, save_dir = tempdir(), width = 8, height = 6, 
-                                                file_prefix = "toppPlot", combine = FALSE, ncols = 2, 
-                                                y_axis_text_size = 10, slot_name = "toppData", ...) {
+                                                file_prefix = NULL, combine = FALSE, ncols = 2,
+                                                y_axis_text_size = 10, slot_name = "toppData",
+                                                ..., filename = NULL) {
   # RangedSummarizedExperiment inherits from SummarizedExperiment
   # so we can use the same method
   toppPlot.SummarizedExperiment(toppData, category = category, clusters = clusters, cluster_col = cluster_col,
                                 p_val_adj = p_val_adj, p_val_display = p_val_display, num_terms = num_terms,
                                 save = save, save_dir = save_dir, width = width, height = height,
                                 file_prefix = file_prefix, combine = combine, ncols = ncols,
-                                y_axis_text_size = y_axis_text_size, slot_name = slot_name, ...)
+                                y_axis_text_size = y_axis_text_size, slot_name = slot_name,
+                                filename = filename, ...)
 }
 
 #' @export
@@ -555,41 +548,43 @@ toppPlot.RangedSummarizedExperiment <- function(toppData, category = NULL, clust
 toppPlot.SingleCellExperiment <- function(toppData, category = NULL, clusters = NULL, cluster_col = "Cluster", 
                                           p_val_adj = "QValueFDRBH", p_val_display = "FDR_BH", num_terms = 10,
                                           save = FALSE, save_dir = tempdir(), width = 8, height = 6, 
-                                          file_prefix = "toppPlot", combine = FALSE, ncols = 2, 
-                                          y_axis_text_size = 10, slot_name = "toppData", ...) {
+                                          file_prefix = NULL, combine = FALSE, ncols = 2,
+                                          y_axis_text_size = 10, slot_name = "toppData",
+                                          ..., filename = NULL) {
   # SingleCellExperiment inherits from RangedSummarizedExperiment
   # so we can use the same method
   toppPlot.SummarizedExperiment(toppData, category = category, clusters = clusters, cluster_col = cluster_col,
                                 p_val_adj = p_val_adj, p_val_display = p_val_display, num_terms = num_terms,
                                 save = save, save_dir = save_dir, width = width, height = height,
                                 file_prefix = file_prefix, combine = combine, ncols = ncols,
-                                y_axis_text_size = y_axis_text_size, slot_name = slot_name, ...)
+                                y_axis_text_size = y_axis_text_size, slot_name = slot_name,
+                                filename = filename, ...)
 }
 
 #' @export
 #' @method toppBalloon RangedSummarizedExperiment
 toppBalloon.RangedSummarizedExperiment <- function(toppData, categories = NULL, balloons = 3, x_axis_text_size = 6, 
-                                                   cluster_col = "Cluster", filename = "toppBalloon",
-                                                   save = FALSE, save_dir = tempdir(), height = 6, width = 8, 
-                                                   slot_name = "toppData", ...) {
+                                                   cluster_col = "Cluster", file_prefix = NULL,
+                                                   save = FALSE, save_dir = tempdir(), height = 6, width = 8,
+                                                   slot_name = "toppData", ..., filename = NULL) {
   # RangedSummarizedExperiment inherits from SummarizedExperiment
   # so we can use the same method
   toppBalloon.SummarizedExperiment(toppData, categories = categories, balloons = balloons, 
                                    x_axis_text_size = x_axis_text_size, cluster_col = cluster_col,
-                                   filename = filename, save = save, save_dir = save_dir, 
+                                   file_prefix = file_prefix, filename = filename, save = save, save_dir = save_dir,
                                    height = height, width = width, slot_name = slot_name, ...)
 }
 
 #' @export
 #' @method toppBalloon SingleCellExperiment
 toppBalloon.SingleCellExperiment <- function(toppData, categories = NULL, balloons = 3, x_axis_text_size = 6, 
-                                             cluster_col = "Cluster", filename = "toppBalloon",
-                                             save = FALSE, save_dir = tempdir(), height = 6, width = 8, 
-                                             slot_name = "toppData", ...) {
+                                             cluster_col = "Cluster", file_prefix = NULL,
+                                             save = FALSE, save_dir = tempdir(), height = 6, width = 8,
+                                             slot_name = "toppData", ..., filename = NULL) {
   # SingleCellExperiment inherits from RangedSummarizedExperiment
   # so we can use the same method
   toppBalloon.SummarizedExperiment(toppData, categories = categories, balloons = balloons, 
                                    x_axis_text_size = x_axis_text_size, cluster_col = cluster_col,
-                                   filename = filename, save = save, save_dir = save_dir, 
+                                   file_prefix = file_prefix, filename = filename, save = save, save_dir = save_dir,
                                    height = height, width = width, slot_name = slot_name, ...)
 }

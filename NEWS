@@ -1,3 +1,13 @@
+CHANGES IN VERSION 1.1.1
+------------------------
+ - standardized the file naming argument to `file_prefix` in toppSave(), toppPlot() and toppBalloon(); `filename` still works as a legacy alias
+ - toppBalloon() now honors `save_dir`
+ - new toppSE() container: a term x cluster SummarizedExperiment holding DEGs and/or enrichment results
+ - toppFun() is now an S3 generic; toppFun(se) runs the query on the DEGs stored in a toppSE and fills in the results
+ - new helpers toppData(), addDEGs() and termGenes(); toppPlot(), toppBalloon() and toppSave() accept a toppSE directly
+ - new toppVolc(): volcano plots of a cluster's DEGs that highlight the genes of enriched ToppGene terms (works on a toppSE or a results data.frame plus DEGs)
+ - fixed addToppData() recording the clusters of the results
+
 CHANGES IN VERSION 0.99.5
 ------------------------
  - refactored code for better efficiency

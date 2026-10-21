@@ -16,12 +16,13 @@ toppPlot(
   save_dir = tempdir(),
   width = 8,
   height = 6,
-  file_prefix = "toppPlot",
+  file_prefix = NULL,
   combine = FALSE,
   ncols = 2,
   y_axis_text_size = 10,
   slot_name = "toppData",
-  ...
+  ...,
+  filename = NULL
 )
 }
 \arguments{
@@ -47,7 +48,7 @@ toppPlot(
 
 \item{height}{height of the saved file (inches)}
 
-\item{file_prefix}{file prefix if saving the plot - the cluster name is also added automatically}
+\item{file_prefix}{Filename prefix for saved plots (defaults to \code{"toppPlot"}); cluster names are added automatically}
 
 \item{combine}{If TRUE and multiple clusters selected, return a patchwork object of all plots; if FALSE return list of plots}
 
@@ -58,6 +59,8 @@ toppPlot(
 \item{slot_name}{For SE/SCE objects, the metadata slot name containing toppData (default: "toppData")}
 
 \item{...}{Additional parameters for future use}
+
+\item{filename}{Legacy compatibility alias for \code{file_prefix}}
 }
 \value{
 ggplot object or list of ggplot objects

@@ -6,18 +6,19 @@
 \usage{
 toppSave(
   toppData,
-  filename = "toppData_results",
+  file_prefix = NULL,
   save_dir = NULL,
   split = TRUE,
   format = "xlsx",
   cluster_col = "Cluster",
-  verbose = TRUE
+  verbose = TRUE,
+  filename = NULL
 )
 }
 \arguments{
-\item{toppData}{Results from toppFun as a dataframe}
+\item{toppData}{Results from toppFun as a dataframe, or a SummarizedExperiment created with \code{\link[=toppSE]{toppSE()}}}
 
-\item{filename}{filename prefix for each split file}
+\item{file_prefix}{Filename prefix for each output file}
 
 \item{save_dir}{the directory to save files}
 
@@ -28,6 +29,8 @@ toppSave(
 \item{cluster_col}{Column name for the groups of cells (e.g. cluster or celltype), usually "Cluster"}
 
 \item{verbose}{Verbosity setting, TRUE or FALSE}
+
+\item{filename}{Legacy compatibility alias for \code{file_prefix}}
 }
 \value{
 A saved file
@@ -38,7 +41,7 @@ Save toppData results (optionally) split by celltype/cluster
 \examples{
 data("toppdata.ifnb")
 toppSave(toppdata.ifnb, 
-    filename = "toppFun_results", 
+    file_prefix = "toppFun_results",
     save_dir = tempdir(), 
     split = TRUE, 
     format = "xlsx")

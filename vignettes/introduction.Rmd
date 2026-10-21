@@ -133,7 +133,48 @@ scToppR will also automatically save the results of the ToppGene query. By defau
 
 ```{r save}
 tmpdir <- tempdir()
-toppSave(toppdata.pbmc, filename = "PBMC", save_dir = tmpdir, split = TRUE, format = "xlsx")
+toppSave(toppdata.pbmc, file_prefix = "PBMC", save_dir = tmpdir, split = TRUE, format = "xlsx")
+```
+
+## Working with a SummarizedExperiment
+
+Instead of passing a data frame around, you can wrap your DEGs in a `toppSE` container with `toppSE()`. This standardizes the column names once, so you don't need to repeat the `*_col` arguments. Calling `toppFun()` on the container runs the ToppGene query and stores the results as a term x cluster `SummarizedExperiment`.
+
+```{r toppSE}
+se <- toppSE(
+    pbmc.markers,
+    cluster_col = "cluster",
+    gene_col = "gene",
+    p_val_col = "p_val_adj",
+    logFC_col = "avg_log2FC"
+)
+se
+
+if (curl::has_internet()) {
+    se <- toppFun(se)
+} else {
+    # offline: build the container from the cached results and re-attach the DEGs
+    se <- toppSE(toppdata.pbmc)
+    se <- addDEGs(
+        se, pbmc.markers,
+        cluster_col = "cluster", gene_col = "gene",
+        p_val_col = "p_val_adj", logFC_col = "avg_log2FC"
+    )
+}
+se
+```
+
+The container can be passed directly to `toppPlot()`, `toppBalloon()` and `toppSave()`. Use `toppData()` to get the familiar long data frame back, and `termGenes()` to list the genes behind a term together with their DEG statistics:
+
+```{r toppSE_use}
+head(toppData(se), 3)
+cluster <- colnames(se)[1]
+term <- toppData(se)$Name[toppData(se)$Cluster == cluster][1]
+# requires results that include the Genes column (a live toppFun() run)
+if ("Genes" %in% SummarizedExperiment::assayNames(se) &&
+    !all(is.na(SummarizedExperiment::assay(se, "Genes")))) {
+    termGenes(se, term, cluster = cluster)
+}
 ```
 
 ```{r sessionInfo}

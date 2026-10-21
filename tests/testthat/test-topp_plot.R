@@ -400,6 +400,63 @@ test_that("toppBalloon parameter variations work", {
     expect_s3_class(balloon_custom, "ggplot")
 })
 
+test_that("plot saving uses file_prefix and retains filename aliases", {
+    data("toppdata.pbmc")
+    output_dir <- tempfile("topp-plots-")
+    dir.create(output_dir)
+    on.exit(unlink(output_dir, recursive = TRUE), add = TRUE)
+
+    toppPlot(
+        toppdata.pbmc,
+        category = "GeneOntologyMolecularFunction",
+        clusters = "CD4T",
+        file_prefix = "standardized_plot",
+        save = TRUE,
+        save_dir = output_dir
+    )
+    expect_true(file.exists(file.path(
+        output_dir,
+        "standardized_plot_GeneOntologyMolecularFunction.pdf"
+    )))
+
+    toppPlot(
+        toppdata.pbmc,
+        category = "GeneOntologyMolecularFunction",
+        clusters = "CD4T",
+        filename = "legacy_plot",
+        save = TRUE,
+        save_dir = output_dir
+    )
+    expect_true(file.exists(file.path(
+        output_dir,
+        "legacy_plot_GeneOntologyMolecularFunction.pdf"
+    )))
+
+    toppBalloon(
+        toppdata.pbmc,
+        categories = "GeneOntologyMolecularFunction",
+        file_prefix = "standardized_balloon",
+        save = TRUE,
+        save_dir = output_dir
+    )
+    expect_true(file.exists(file.path(
+        output_dir,
+        "standardized_balloon_GeneOntologyMolecularFunction.pdf"
+    )))
+
+    toppBalloon(
+        toppdata.pbmc,
+        categories = "GeneOntologyMolecularFunction",
+        filename = "legacy_balloon",
+        save = TRUE,
+        save_dir = output_dir
+    )
+    expect_true(file.exists(file.path(
+        output_dir,
+        "legacy_balloon_GeneOntologyMolecularFunction.pdf"
+    )))
+})
+
 test_that("plotting functions handle edge cases", {
     data("toppdata.pbmc")
     

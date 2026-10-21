@@ -76,6 +76,24 @@ test_that("toppFun save as split xlsx works", {
     expect_gt(nrow(df), 0)
 })
 
+test_that("toppSave accepts the standardized file_prefix argument", {
+    data("toppdata.ifnb")
+    output_dir <- tempfile("topp-save-")
+    dir.create(output_dir)
+    on.exit(unlink(output_dir, recursive = TRUE), add = TRUE)
+
+    toppSave(
+        toppData = toppdata.ifnb,
+        file_prefix = "standardized_results",
+        save_dir = output_dir,
+        split = FALSE,
+        format = "csv",
+        verbose = FALSE
+    )
+
+    expect_true(file.exists(file.path(output_dir, "standardized_results.csv")))
+})
+
 ## test save file as xlsx - all data
 test_that("toppFun save as xlsx works", {
     data("toppdata.ifnb")
